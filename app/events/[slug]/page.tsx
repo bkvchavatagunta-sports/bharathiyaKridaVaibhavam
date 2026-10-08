@@ -7,32 +7,17 @@ import { notFound } from "next/navigation";
 
 export default async function EventDetails({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  let event = await prisma.event.findUnique({ where: { slug: resolvedParams.slug } });
+  const event = await prisma.event.findUnique({ where: { slug: resolvedParams.slug } });
   
   if (!event) {
-    event = {
-      id: "mock-1",
-      title: "Annual Village Marathon 2026",
-      slug: "village-marathon-2026",
-      dedicationName: "Late Sri XYZ Memorial Cup",
-      sportType: "Marathon",
-      description: "Join the biggest marathon of the year organized by BHARATIYA KRIDA VAIBHAVAM. This event is dedicated to bringing out the hidden running talent from our villages.",
-      bannerImage: "https://picsum.photos/seed/marathon/1920/1080",
-      venue: "Zilla Parishad Ground, District XYZ",
-      startDate: new Date("2026-12-15"),
-      endDate: new Date("2026-12-15"),
-      entryFee: 250,
-      status: "UPCOMING",
-      createdAt: new Date(),
-    } as any;
-    if (resolvedParams.slug !== "village-marathon-2026") {
-      notFound();
-    }
+    notFound();
   }
+
+  const isFinished = event.status === "COMPLETED" || event.status === "CANCELLED";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
-      <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-xl mb-8">
+      <div className={`relative w-full h-[400px] rounded-2xl overflow-hidden shadow-xl mb-8 ${isFinished ? 'opacity-70 grayscale' : ''}`}>
         <Image 
           src={event.bannerImage} 
           alt={event.title} 
@@ -40,13 +25,20 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
           className="object-cover" 
         />
         <div className="absolute inset-0 bg-black/40 flex items-end">
-          <div className="p-8 text-white">
-            <div className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase rounded-full mb-3">
-              {event.sportType}
+          <div className="p-8 text-white w-full flex justify-between items-end">
+            <div>
+              <div className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase rounded-full mb-3 shadow-sm">
+                {event.sportType}
+              </div>
+              <h1 className="text-4xl md:text-5xl font-extrabold mb-2">{event.title}</h1>
+              {event.dedicationName && (
+                <p className="text-xl font-medium text-gray-200">{event.dedicationName}</p>
+              )}
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-2">{event.title}</h1>
-            {event.dedicationName && (
-              <p className="text-xl font-medium text-gray-200">{event.dedicationName}</p>
+            {isFinished && (
+              <div className="bg-black/60 px-6 py-2 rounded-lg border border-white/20">
+                 <p className="font-black text-2xl tracking-widest text-red-400">{event.status}</p>
+              </div>
             )}
           </div>
         </div>
@@ -56,9 +48,31 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
         <div className="md:col-span-2 space-y-8">
           <section>
             <h2 className="text-2xl font-bold mb-4">About The Event</h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
               {event.description}
             </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-bold mb-4">Categories & Formats</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-muted/30 p-4 rounded-xl border">
+                 <p className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Age Groups</p>
+                 <div className="flex flex-wrap gap-2">
+                   {event.ageGroups && event.ageGroups.length > 0 ? (
+                     event.ageGroups.map((g: string) => <span key={g} className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{g}</span>)
+                   ) : <span className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">Open Category</span>}
+                 </div>
+              </div>
+              <div className="bg-muted/30 p-4 rounded-xl border">
+                 <p className="font-bold text-sm text-muted-foreground uppercase tracking-wider mb-2">Sub-Events</p>
+                 <div className="flex flex-wrap gap-2">
+                   {event.subCategories && event.subCategories.length > 0 ? (
+                     event.subCategories.map((c: string) => <span key={c} className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{c}</span>)
+                   ) : <span className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{event.sportType} Default</span>}
+                 </div>
+              </div>
+            </div>
           </section>
 
           <section>
@@ -67,10 +81,6 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
                 <span>Participants must bring a valid age-proof ID on the day of the event.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                <span>Chest numbers will be distributed 1 hour before the start time.</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
@@ -89,7 +99,7 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
                 <Calendar className="w-5 h-5 text-primary" />
                 <div>
                   <p className="font-medium">Date</p>
-                  <p className="text-sm text-muted-foreground">{event.startDate.toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">{event.startDate.toLocaleDateString()} to {event.endDate.toLocaleDateString()}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -103,17 +113,23 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
                   <p className="font-medium">Entry Fee</p>
-                  <p className="text-sm text-muted-foreground">₹{event.entryFee}</p>
+                  <p className="text-sm font-bold text-green-600">{event.entryFee > 0 ? `₹${event.entryFee}` : 'Free Entry'}</p>
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <Link href={`/events/${event.slug}/register`}>
-                <Button size="lg" className="w-full font-bold text-lg">
-                  Register Now
-                </Button>
-              </Link>
+              {isFinished ? (
+                 <Button size="lg" className="w-full font-bold text-lg" disabled variant="secondary">
+                   Registration Closed
+                 </Button>
+              ) : (
+                <Link href={`/events/${event.slug}/register`}>
+                  <Button size="lg" className="w-full font-bold text-lg shadow-lg">
+                    Register Now
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
