@@ -1,0 +1,146 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  FREE
+}
+
+enum EventStatus {
+  UPCOMING
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String?        @unique
+  phone         String         @unique
+  role          Role           @default(USER)
+  village       String?
+  createdAt     DateTime       @default(now())
+  registrations Registration[]
+}
+
+model Event {
+  id              String         @id @default(cuid())
+  title           String
+  slug            String         @unique
+  dedicationName  String?        // e.g. "Late Sri XYZ Memorial Cup"
+  sportType       String         // Marathon, Athletics, Hockey, etc.
+  subCategories   String[]       @default([])
+  ageGroups       String[]       @default([])
+  description     String
+  bannerImage     String         // Cloudinary URL
+  venue           String
+  startDate       DateTime
+  endDate         DateTime
+  entryFee        Float          @default(0)
+  status          EventStatus    @default(UPCOMING)
+  prizes          Prize[]
+  guests          Guest[]
+  registrations   Registration[]
+  galleries       GalleryImage[]
+  discounts       DiscountCode[]
+  createdAt       DateTime       @default(now())
+}
+
+model Prize {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category    String   // e.g., "10K Men", "Under-16 Football"
+  position    String   // Winner, Runner, Best Player
+  cashAmount  Float    @default(0)
+  awardDetails String? // Medal, Certificate, Trophy
+  recipientName String? // Populated post-event
+}
+
+model Guest {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name        String
+  title       String   // e.g., Ex-Olympian / MLA / Local Sports Officer
+  photoUrl    String?
+}
+
+model Registration {
+  id               String        @id @default(cuid())
+  registrationNo   String        @unique // e.g., MAR-2026-0042
+  eventId          String
+  event            Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User          @relation(fields: [userId], references: [id])
+  sportSubCategory String        // e.g., "100m Sprint" or "5K Open"
+  age              Int
+  gender           String
+  emergencyContact String
+  
+  // Team Fields
+  isTeamRegistration Boolean @default(false)
+  teamName           String?
+  captainName        String?
+  viceCaptainName    String?
+  coachName          String?
+  playerNames        String[] @default([])
+
+  finalFee         Float
+  paymentStatus    PaymentStatus @default(PENDING)
+  paymentProofUrl  String?       // Cloudinary screenshot url
+  registeredAt     DateTime      @default(now())
+}
+
+model DiscountCode {
+  id          String   @id @default(cuid())
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  code        String
+  discountPct Float    // e.g. 50 for 50%
+  maxUses     Int      @default(100)
+  usedCount   Int      @default(0)
+}
+
+model Sponsor {
+  id       String  @id @default(cuid())
+  name     String
+  tier     String  // Title, Gold, Associate, Patron
+  logoUrl  String
+  website  String?
+}
+
+model Biography {
+  id          String   @id @default(cuid())
+  title       String
+  athleteName String
+  sport       String
+  achievements String
+  story       String   // Markdown content
+  heroImage   String
+  publishedAt DateTime @default(now())
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  eventId   String?
+  event     Event?   @relation(fields: [eventId], references: [id])
+  imageUrl  String
+  caption   String?
+  year      Int
+  uploadedAt DateTime @default(now())
+}
