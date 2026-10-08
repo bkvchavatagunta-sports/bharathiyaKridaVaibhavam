@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LayoutDashboard, Calendar, Users, Settings } from "lucide-react";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export default function AdminLayout({
   children,
@@ -23,6 +24,9 @@ export default function AdminLayout({
           <Link href="/admin/registrations" className="flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md text-muted-foreground font-medium transition-colors">
             <Users className="w-5 h-5" /> Registrations
           </Link>
+          <div className="pt-8 mt-8 border-t border-dashed">
+             <SignOutButton />
+          </div>
         </nav>
       </aside>
       
