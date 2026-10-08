@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
   const participantsCount = allRegistrations.length;
 
   const feesCollected = allRegistrations
-    .filter(r => r.paymentStatus === "VERIFIED" || (r.paymentStatus === "PENDING" && r.paymentMode === "VENUE")) // Assuming venue cash collected
+    .filter(r => r.paymentStatus === "VERIFIED" || (r.paymentStatus === "PENDING" && !r.paymentProofUrl)) // Assuming venue cash collected
     .reduce((sum, r) => sum + (r.finalFee || 0), 0);
 
   // We haven't built the sponsorships model yet, so we will show a placeholder block.

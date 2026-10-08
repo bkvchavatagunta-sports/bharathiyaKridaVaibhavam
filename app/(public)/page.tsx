@@ -26,10 +26,10 @@ export default async function Home() {
   });
 
   const dbImages = await prisma.galleryImage.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { uploadedAt: 'desc' },
     take: 10
   });
-  const imageUrls = dbImages.map(img => img.url);
+  const imageUrls = dbImages.map(img => img.imageUrl);
 
   return (
     <div className="flex flex-col gap-24 pb-24">

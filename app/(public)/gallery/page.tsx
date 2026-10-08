@@ -3,9 +3,9 @@ import prisma from "@/lib/db";
 
 export default async function GalleryPage() {
   const dbImages = await prisma.galleryImage.findMany({
-    orderBy: { createdAt: 'desc' }
+    orderBy: { uploadedAt: 'desc' }
   });
-  const imageUrls = dbImages.map(img => img.url);
+  const imageUrls = dbImages.map(img => img.imageUrl);
 
   return (
     <div className="container mx-auto px-4 py-12 min-h-[70vh]">

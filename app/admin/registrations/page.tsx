@@ -68,8 +68,8 @@ export default async function RegistrationsPage() {
                   <TableCell className="text-right">
                     {reg.paymentStatus === "PENDING" && isUPI ? (
                       <Dialog>
-                        <DialogTrigger asChild>
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Verify Screenshot</Button>
+                        <DialogTrigger className="inline-flex h-8 items-center justify-center rounded-md bg-blue-600 px-3 text-xs font-medium text-white shadow hover:bg-blue-700">
+                          Verify Screenshot
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
