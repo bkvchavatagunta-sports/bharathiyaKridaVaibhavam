@@ -1,6 +1,12 @@
 import { GalleryCarousel } from "@/components/GalleryCarousel";
+import prisma from "@/lib/db";
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const dbImages = await prisma.galleryImage.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+  const imageUrls = dbImages.map(img => img.url);
+
   return (
     <div className="container mx-auto px-4 py-12 min-h-[70vh]">
       <div className="text-center mb-12">
@@ -9,7 +15,7 @@ export default function GalleryPage() {
           Browse through the incredible moments captured during our tournaments.
         </p>
       </div>
-      <GalleryCarousel />
+      <GalleryCarousel images={imageUrls} />
     </div>
   );
 }

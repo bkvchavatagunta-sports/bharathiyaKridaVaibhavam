@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 export async function submitRegistration(data: any) {
   // Find or create user
@@ -74,4 +75,12 @@ export async function findRegistration(query: { regNo?: string; name?: string; p
   }
   
   return null;
+}
+
+export async function verifyPayment(registrationId: string) {
+  await prisma.registration.update({
+    where: { id: registrationId },
+    data: { paymentStatus: "VERIFIED" }
+  });
+  revalidatePath("/admin/registrations");
 }

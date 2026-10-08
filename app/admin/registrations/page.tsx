@@ -1,28 +1,15 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import prisma from "@/lib/db";
+import { verifyPayment } from "@/app/actions/registration";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-export default function RegistrationsPage() {
-  const mockRegistrations = [
-    {
-      id: "reg-1",
-      name: "Ramesh Kumar",
-      phone: "+91 9876543210",
-      event: "Annual Village Marathon 2026",
-      category: "5K Open",
-      paymentMode: "UPI",
-      status: "PENDING_VERIFICATION",
-    },
-    {
-      id: "reg-2",
-      name: "Suresh Singh",
-      phone: "+91 8765432109",
-      event: "Annual Village Marathon 2026",
-      category: "10K Men",
-      paymentMode: "VENUE",
-      status: "PENDING",
-    },
-  ];
+export default async function RegistrationsPage() {
+  const registrations = await prisma.registration.findMany({
+    include: { event: true, user: true },
+    orderBy: { registeredAt: 'desc' }
+  });
 
   return (
     <div className="p-8 space-y-6">
@@ -31,41 +18,89 @@ export default function RegistrationsPage() {
         <p className="text-muted-foreground mt-1">Review registrations and verify UPI payments.</p>
       </div>
 
-      <div className="border rounded-md bg-white">
+      <div className="border rounded-md bg-white overflow-hidden shadow-sm">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             <TableRow>
+              <TableHead>Registration ID</TableHead>
               <TableHead>Participant</TableHead>
               <TableHead>Phone</TableHead>
-              <TableHead>Event</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Payment</TableHead>
+              <TableHead>Event & Category</TableHead>
+              <TableHead>Payment Mode</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockRegistrations.map((reg) => (
-              <TableRow key={reg.id}>
-                <TableCell className="font-medium">{reg.name}</TableCell>
-                <TableCell>{reg.phone}</TableCell>
-                <TableCell>{reg.event}</TableCell>
-                <TableCell>{reg.category}</TableCell>
-                <TableCell>{reg.paymentMode}</TableCell>
-                <TableCell>
-                  <Badge variant={reg.status === "PENDING_VERIFICATION" ? "outline" : "secondary"} className={reg.status === "PENDING_VERIFICATION" ? "border-yellow-500 text-yellow-600" : ""}>
-                    {reg.status.replace('_', ' ')}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  {reg.status === "PENDING_VERIFICATION" ? (
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700">Verify UPI</Button>
-                  ) : (
-                    <Button size="sm" variant="outline">View</Button>
-                  )}
+            {registrations.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  No registrations found yet.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : registrations.map((reg) => {
+               // The payment mode is technically inferred: if paymentProofUrl exists, it was UPI. Else VENUE.
+               const isUPI = !!reg.paymentProofUrl;
+               
+               return (
+                <TableRow key={reg.id}>
+                  <TableCell className="font-mono text-sm font-bold">{reg.registrationNo}</TableCell>
+                  <TableCell className="font-medium">
+                    {reg.isTeamRegistration ? reg.teamName : reg.user.name}
+                    {reg.isTeamRegistration && <span className="block text-xs text-muted-foreground">Capt: {reg.captainName}</span>}
+                  </TableCell>
+                  <TableCell>{reg.user.phone}</TableCell>
+                  <TableCell>
+                    <span className="block font-bold">{reg.event.title}</span>
+                    <span className="text-xs text-muted-foreground">{reg.sportSubCategory} ({reg.age} Yrs)</span>
+                  </TableCell>
+                  <TableCell>
+                    {isUPI ? 'UPI / Online' : 'Pay at Venue'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={reg.paymentStatus === "VERIFIED" || reg.paymentStatus === "FREE" ? "default" : "secondary"} 
+                      className={reg.paymentStatus === "PENDING" && isUPI ? "border-yellow-500 text-yellow-700 bg-yellow-50" : reg.paymentStatus === "PENDING" ? "text-gray-600 bg-gray-100" : "bg-green-100 text-green-700"}
+                    >
+                      {reg.paymentStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {reg.paymentStatus === "PENDING" && isUPI ? (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Verify Screenshot</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Verify Payment Proof</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <p className="text-sm font-medium">Please verify the UPI payment screenshot below for {reg.isTeamRegistration ? reg.teamName : reg.user.name} (Fee: ₹{reg.finalFee}).</p>
+                            <img src={reg.paymentProofUrl!} alt="UPI Proof" className="w-full rounded-md border" />
+                            <form action={async () => {
+                               "use server";
+                               await verifyPayment(reg.id);
+                            }}>
+                               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 font-bold">Approve & Verify Payment</Button>
+                            </form>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    ) : reg.paymentStatus === "PENDING" && !isUPI ? (
+                       <form action={async () => {
+                           "use server";
+                           await verifyPayment(reg.id);
+                        }}>
+                           <Button size="sm" type="submit" variant="outline" className="text-green-600 border-green-600 hover:bg-green-50">Mark Paid at Venue</Button>
+                       </form>
+                    ) : (
+                      <span className="text-sm font-bold text-green-600">Verified ✓</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+               )
+            })}
           </TableBody>
         </Table>
       </div>

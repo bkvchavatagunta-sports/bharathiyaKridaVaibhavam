@@ -1,47 +1,50 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, MapPin, Users, Medal, Trophy, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { GalleryCarousel } from "@/components/GalleryCarousel";
-import prisma from "@/lib/db";
+import { Trophy, Calendar, MapPin, ChevronRight, Users, Medal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { GalleryCarousel } from "@/components/GalleryCarousel";
+import Image from "next/image";
+import prisma from "@/lib/db";
 
 export default async function Home() {
   const fiveDaysAgo = new Date();
   fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 5);
 
-  const featuredEvents = await prisma.event.findMany({ 
-    where: { 
+  const featuredEvents = await prisma.event.findMany({
+    where: {
       OR: [
         { status: "UPCOMING" },
-        { status: "ONGOING" },
-        { 
-          status: { in: ["COMPLETED", "CANCELLED"] },
-          endDate: { gte: fiveDaysAgo }
-        }
+        { endDate: { gte: fiveDaysAgo } }
       ]
     },
-    orderBy: { startDate: 'asc' },
+    orderBy: [
+      { status: 'desc' },
+      { startDate: 'asc' }
+    ],
     take: 3
   });
 
+  const dbImages = await prisma.galleryImage.findMany({
+    orderBy: { createdAt: 'desc' },
+    take: 10
+  });
+  const imageUrls = dbImages.map(img => img.url);
+
   return (
-    <div className="flex flex-col gap-16 pb-16">
+    <div className="flex flex-col gap-24 pb-24">
       {/* Hero Section */}
-      <section className="relative w-full h-[600px] flex items-center justify-center overflow-hidden bg-slate-900">
-        <div className="absolute inset-0 z-0 opacity-40">
-          <Image
-            src="https://picsum.photos/seed/hero/1920/1080"
-            alt="Athletics Track"
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-        <div className="relative z-10 container px-4 mx-auto text-center text-white space-y-6 max-w-4xl">
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight">
-            Championing Rural Talent
+      <section className="relative pt-32 pb-40 flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/sports/1920/1080')] bg-cover bg-center" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        
+        <div className="container relative z-10 mx-auto px-4 text-center space-y-8 max-w-4xl">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white backdrop-blur-md">
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            <span className="text-sm font-semibold tracking-wider">ANNUAL SPORTS MEET 2026</span>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-tight">
+            BHARATIYA KRIDA <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">VAIBHAVAM</span>
           </h1>
           <p className="text-lg md:text-2xl text-gray-200 font-medium">
             Join the biggest rural sports revolution. Founded by national medalists, for the next generation of champions.
@@ -57,23 +60,24 @@ export default async function Home() {
                 Download Your Pass
               </Button>
             </Link>
+            <Link href="/hall-of-fame">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 h-auto border-white text-white hover:bg-white hover:text-black">
+                Hall of Fame
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Foundation Story */}
+      {/* About Section */}
       <section className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">Our Roots, Our Vision</h2>
-            <div className="w-20 h-2 bg-yellow-500 rounded-full"></div>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              We started from dust tracks and muddy fields. Now, a collective of national medalists in Athletics, Hockey, Swimming, and Archery have united to bring world-class event management to rural talent.
+            <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2015</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM hosts over 10,000+ rural athletes across 15+ disciplines.
             </p>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Our mission is simple: discover, celebrate, and elevate athletes from villages who have the fire but lack the platform.
-            </p>
-            <div className="grid grid-cols-3 gap-4 pt-4">
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t">
               <div className="text-center space-y-2">
                 <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
                 <h4 className="font-bold text-2xl">50+</h4>
@@ -202,7 +206,7 @@ export default async function Home() {
       </section>
 
       {/* Gallery Carousel */}
-      <GalleryCarousel />
+      <GalleryCarousel images={imageUrls} />
 
       {/* Sponsors Section */}
       <section className="container mx-auto px-4 text-center space-y-10 border-t pt-16">
