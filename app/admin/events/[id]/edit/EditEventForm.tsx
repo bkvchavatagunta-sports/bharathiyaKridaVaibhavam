@@ -224,8 +224,13 @@ export function EditEventForm({ event }: { event: any }) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="font-bold">Event Description & Rules *</Label>
+          <Label htmlFor="description" className="font-bold">About the Event (Description) *</Label>
           <Textarea id="description" name="description" defaultValue={event.description} required className="min-h-[120px]" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="rules" className="font-bold">Rules and Guidelines</Label>
+          <Textarea id="rules" name="rules" defaultValue={event.rules || ""} className="min-h-[120px]" />
         </div>
 
         <div className="pt-8 border-t">

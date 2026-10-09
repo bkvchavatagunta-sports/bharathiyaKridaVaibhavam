@@ -4,6 +4,7 @@ import { Trophy, Calendar, MapPin, ChevronRight, Users, Medal } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { GalleryCarousel } from "@/components/GalleryCarousel";
+import { BackgroundCarousel } from "@/components/BackgroundCarousel";
 import Image from "next/image";
 import prisma from "@/lib/db";
 
@@ -36,14 +37,22 @@ export default async function Home() {
   const totalEvents = await prisma.event.count();
   const displayEvents = 3 + totalEvents;
 
+  const dbHeroImages = await prisma.heroImage.findMany({
+    orderBy: { uploadedAt: 'desc' }
+  });
+  // Default to static if none uploaded yet
+  const heroImageUrls = dbHeroImages.length > 0 
+    ? dbHeroImages.map(img => img.imageUrl) 
+    : ['/hero-bg.jpg'];
+
   return (
     <div className="flex flex-col gap-16 pb-24">
       {/* Hero Section */}
       <section className="relative pt-32 pb-40 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/hero-bg.jpg')] bg-cover bg-center" />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
+        <BackgroundCarousel imageUrls={heroImageUrls} opacity={100} interval={5000} />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10" />
         
-        <div className="container relative z-10 mx-auto px-4 text-center space-y-8 max-w-4xl">
+        <div className="container relative z-20 mx-auto px-4 text-center space-y-8 max-w-4xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white backdrop-blur-md">
             <Trophy className="w-5 h-5 text-yellow-500" />
             <span className="text-sm font-semibold tracking-wider">SPORTS FOR UNITY</span>
@@ -70,38 +79,41 @@ export default async function Home() {
       </section>
 
       {/* About Section */}
-      <section className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2022</h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
-              We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM a local hosts over {displayAthletes}+ rural athletes from around Andhra Pradesh across {displayEvents} disciplines. And we are looking forward with big success.
-            </p>
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t">
-              <div className="text-center space-y-2">
-                <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
-                <h4 className="font-bold text-2xl">{displayEvents}</h4>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Events</p>
-              </div>
-              <div className="text-center space-y-2">
-                <Users className="w-8 h-8 mx-auto text-blue-500" />
-                <h4 className="font-bold text-2xl">{displayAthletes}+</h4>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Athletes</p>
-              </div>
-              <div className="text-center space-y-2">
-                <Medal className="w-8 h-8 mx-auto text-green-500" />
-                <h4 className="font-bold text-2xl">60+</h4>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Awards</p>
+      <section className="relative py-16 bg-white overflow-hidden">
+        <BackgroundCarousel imageUrls={imageUrls} opacity={15} interval={4000} />
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
+            <div className="space-y-6">
+              <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2021</h2>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM a local hosts over {displayAthletes}+ rural athletes from around Andhra Pradesh across {displayEvents} disciplines. And we are looking forward with big success.
+              </p>
+              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-muted/50">
+                <div className="text-center space-y-2">
+                  <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
+                  <h4 className="font-bold text-2xl">{displayEvents}</h4>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Events</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <Users className="w-8 h-8 mx-auto text-blue-500" />
+                  <h4 className="font-bold text-2xl">{displayAthletes}+</h4>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Athletes</p>
+                </div>
+                <div className="text-center space-y-2">
+                  <Medal className="w-8 h-8 mx-auto text-green-500" />
+                  <h4 className="font-bold text-2xl">60+</h4>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Awards</p>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
-            <Image 
-              src="/grassroots-real.jpg" 
-              alt="BHARATIYA KRIDA VAIBHAVAM Team" 
-              fill 
-              className="object-cover" 
-            />
+            <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+              <Image 
+                src="/grassroots-real.jpg" 
+                alt="BHARATIYA KRIDA VAIBHAVAM Team" 
+                fill 
+                className="object-cover hover:scale-105 transition-transform duration-700" 
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -131,7 +143,7 @@ export default async function Home() {
                 const isFinished = event.status === "COMPLETED" || event.status === "CANCELLED";
                 
                 return (
-                  <Card key={event.id} className={`overflow-hidden group flex flex-col border-0 shadow-lg ${isFinished ? 'opacity-60 grayscale' : ''}`}>
+                  <Card key={event.id} className={`overflow-hidden group flex flex-col border-0 shadow-xl transition-all duration-300 ${isFinished ? 'opacity-60 grayscale' : 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2'}`}>
                     <div className="relative h-48 w-full overflow-hidden bg-muted">
                       {event.bannerImage && (
                         <Image 

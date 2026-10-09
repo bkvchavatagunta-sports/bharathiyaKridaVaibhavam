@@ -14,6 +14,7 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
   }
 
   const isFinished = event.status === "COMPLETED" || event.status === "CANCELLED";
+  const registrationDisabled = isFinished || event.status === "REGISTRATION_CLOSED";
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -52,6 +53,17 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
               {event.description}
             </p>
           </section>
+
+          {event.rules && (
+            <section>
+              <h2 className="text-2xl font-bold mb-4">Rules & Guidelines</h2>
+              <div className="bg-muted/10 p-6 rounded-xl border">
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {event.rules}
+                </p>
+              </div>
+            </section>
+          )}
 
           <section>
             <h2 className="text-2xl font-bold mb-4">Categories & Formats</h2>
@@ -119,9 +131,9 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
             </div>
 
             <div className="pt-4 border-t">
-              {isFinished ? (
+              {registrationDisabled ? (
                  <Button size="lg" className="w-full font-bold text-lg" disabled variant="secondary">
-                   Registration Closed
+                   {event.status === "REGISTRATION_CLOSED" ? "Registration Closed" : "Event Ended"}
                  </Button>
               ) : (
                 <Link href={`/events/${event.slug}/register`}>

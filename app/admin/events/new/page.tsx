@@ -215,8 +215,13 @@ export default function NewEventPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description" className="font-bold">Event Description & Rules *</Label>
-          <Textarea id="description" name="description" required placeholder="Provide full details, categories, and prize pool..." className="min-h-[120px]" />
+          <Label htmlFor="description" className="font-bold">About the Event (Description) *</Label>
+          <Textarea id="description" name="description" required placeholder="Provide full details and overview of the event..." className="min-h-[120px]" />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="rules" className="font-bold">Rules and Guidelines</Label>
+          <Textarea id="rules" name="rules" placeholder="Enter specific rules, formatting guidelines, etc..." className="min-h-[120px]" />
         </div>
 
         <div className="space-y-2">

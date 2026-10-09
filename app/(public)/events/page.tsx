@@ -45,7 +45,7 @@ export default async function EventsPage() {
             const isFinished = event.status === "COMPLETED" || event.status === "CANCELLED";
             
             return (
-              <Card key={event.id} className={`overflow-hidden group flex flex-col ${isFinished ? 'opacity-60 grayscale' : ''}`}>
+              <Card key={event.id} className={`overflow-hidden group flex flex-col border-0 shadow-xl transition-all duration-300 ${isFinished ? 'opacity-60 grayscale' : 'hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-2'}`}>
                 <div className="relative h-48 w-full overflow-hidden bg-muted">
                   {event.bannerImage && (
                     <Image 

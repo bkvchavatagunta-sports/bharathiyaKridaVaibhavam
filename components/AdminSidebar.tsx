@@ -45,6 +45,12 @@ export function AdminSidebar() {
         >
           <Trophy className="w-5 h-5" /> Photos
         </Link>
+        <Link 
+          href="/admin/hero" 
+          className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${isActive('/admin/hero') ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-muted/50'}`}
+        >
+          <LayoutDashboard className="w-5 h-5" /> Hero Slider
+        </Link>
         <div className="pt-8 mt-8 border-t border-dashed">
            <SignOutButton />
         </div>

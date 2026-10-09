@@ -146,6 +146,32 @@ export default async function AdminEventsPage() {
                         </form>
                       )}
 
+                      {event.status !== "REGISTRATION_CLOSED" && event.status !== "COMPLETED" && event.status !== "CANCELLED" && (
+                        <form action={async () => {
+                          "use server";
+                          await updateEventStatus(event.id, "REGISTRATION_CLOSED");
+                        }}>
+                          <button type="submit" className="w-full text-left">
+                            <DropdownMenuItem className="cursor-pointer text-blue-600">
+                              <XCircle className="w-4 h-4 mr-2" /> Close Registration
+                            </DropdownMenuItem>
+                          </button>
+                        </form>
+                      )}
+
+                      {event.status === "REGISTRATION_CLOSED" && (
+                        <form action={async () => {
+                          "use server";
+                          await updateEventStatus(event.id, "UPCOMING");
+                        }}>
+                          <button type="submit" className="w-full text-left">
+                            <DropdownMenuItem className="cursor-pointer text-primary">
+                              <CheckCircle className="w-4 h-4 mr-2" /> Open Registration
+                            </DropdownMenuItem>
+                          </button>
+                        </form>
+                      )}
+
                       {event.status === "CANCELLED" && (
                         <form action={async () => {
                           "use server";

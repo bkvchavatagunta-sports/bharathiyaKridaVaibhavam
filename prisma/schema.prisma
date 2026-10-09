@@ -24,6 +24,7 @@ enum EventStatus {
   ONGOING
   COMPLETED
   CANCELLED
+  REGISTRATION_CLOSED
 }
 
 model User {
@@ -46,6 +47,7 @@ model Event {
   subCategories   String[]       @default([])
   ageGroups       String[]       @default([])
   description     String
+  rules           String?
   bannerImage     String         // Cloudinary URL
   venue           String
   startDate       DateTime
@@ -146,4 +148,10 @@ model GalleryImage {
   year      Int
   uploadedAt DateTime @default(now())
   category   String   @default("General")
+}
+
+model HeroImage {
+  id         String   @id @default(cuid())
+  imageUrl   String
+  uploadedAt DateTime @default(now())
 }

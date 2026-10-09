@@ -9,6 +9,7 @@ export async function createEvent(formData: FormData) {
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
   const dedicationName = formData.get("dedicationName") as string;
   const description = formData.get("description") as string;
+  const rules = formData.get("rules") as string;
   const bannerImage = formData.get("bannerImage") as string;
   const venue = formData.get("venue") as string;
   const startDate = new Date(formData.get("startDate") as string);
@@ -33,6 +34,7 @@ export async function createEvent(formData: FormData) {
       subCategories,
       ageGroups,
       description,
+      rules,
       bannerImage,
       venue,
       startDate,
@@ -56,7 +58,7 @@ export async function deleteEvent(id: string) {
   redirect("/admin/events");
 }
 
-export async function updateEventStatus(id: string, status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED") {
+export async function updateEventStatus(id: string, status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELLED" | "REGISTRATION_CLOSED") {
   await prisma.event.update({
     where: { id },
     data: { status }
@@ -71,6 +73,7 @@ export async function updateEvent(formData: FormData) {
   const title = formData.get("title") as string;
   const dedicationName = formData.get("dedicationName") as string;
   const description = formData.get("description") as string;
+  const rules = formData.get("rules") as string;
   const venue = formData.get("venue") as string;
   const startDate = new Date(formData.get("startDate") as string);
   const endDate = new Date(formData.get("endDate") as string);
@@ -97,6 +100,7 @@ export async function updateEvent(formData: FormData) {
       ...(subCategories.length > 0 && { subCategories }),
       ...(ageGroups.length > 0 && { ageGroups }),
       description,
+      rules,
       venue,
       startDate,
       endDate,
