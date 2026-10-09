@@ -2,10 +2,16 @@
 
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Image from "next/image";
+import Autoplay from "embla-carousel-autoplay";
+import { useRef } from "react";
 
 export function GalleryCarousel({ images }: { images?: string[] }) {
   // Fallback to empty if no images exist yet
   const displayImages = images && images.length > 0 ? images : [];
+  
+  const plugin = useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })
+  );
 
   if (displayImages.length === 0) {
      return (
@@ -23,7 +29,13 @@ export function GalleryCarousel({ images }: { images?: string[] }) {
       </div>
       
       <div className="px-12 max-w-5xl mx-auto">
-        <Carousel opts={{ align: "start", loop: true }} className="w-full">
+        <Carousel 
+          opts={{ align: "start", loop: true }} 
+          plugins={[plugin.current]}
+          onMouseEnter={plugin.current.stop}
+          onMouseLeave={plugin.current.reset}
+          className="w-full"
+        >
           <CarouselContent>
             {displayImages.map((src, index) => (
               <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">

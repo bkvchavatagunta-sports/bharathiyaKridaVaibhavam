@@ -79,41 +79,42 @@ export default async function Home() {
       </section>
 
       {/* About Section */}
-      <section className="relative py-16 bg-white overflow-hidden">
-        <BackgroundCarousel imageUrls={imageUrls} opacity={15} interval={4000} />
-        <div className="container mx-auto px-4 relative z-10">
-          <div className="grid md:grid-cols-2 gap-12 items-center bg-white/80 backdrop-blur-sm p-8 rounded-3xl shadow-xl">
-            <div className="space-y-6">
-              <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2021</h2>
-              <p className="text-muted-foreground text-lg leading-relaxed">
-                We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM a local hosts over {displayAthletes}+ rural athletes from around Andhra Pradesh across {displayEvents} disciplines. And we are looking forward with big success.
-              </p>
-              <div className="grid grid-cols-3 gap-6 pt-6 border-t border-muted/50">
-                <div className="text-center space-y-2">
-                  <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
-                  <h4 className="font-bold text-2xl">{displayEvents}</h4>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Events</p>
-                </div>
-                <div className="text-center space-y-2">
-                  <Users className="w-8 h-8 mx-auto text-blue-500" />
-                  <h4 className="font-bold text-2xl">{displayAthletes}+</h4>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Athletes</p>
-                </div>
-                <div className="text-center space-y-2">
-                  <Medal className="w-8 h-8 mx-auto text-green-500" />
-                  <h4 className="font-bold text-2xl">60+</h4>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Awards</p>
-                </div>
+      <section className="container mx-auto px-4">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2021</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed">
+              We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM a local hosts over {displayAthletes}+ rural athletes from around Andhra Pradesh across {displayEvents} disciplines. And we are looking forward with big success.
+            </p>
+            <div className="grid grid-cols-3 gap-6 pt-6 border-t">
+              <div className="text-center space-y-2">
+                <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
+                <h4 className="font-bold text-2xl">{displayEvents}</h4>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Events</p>
+              </div>
+              <div className="text-center space-y-2">
+                <Users className="w-8 h-8 mx-auto text-blue-500" />
+                <h4 className="font-bold text-2xl">{displayAthletes}+</h4>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Athletes</p>
+              </div>
+              <div className="text-center space-y-2">
+                <Medal className="w-8 h-8 mx-auto text-green-500" />
+                <h4 className="font-bold text-2xl">60+</h4>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Awards</p>
               </div>
             </div>
-            <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white">
+          </div>
+          <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+            {imageUrls.length > 0 ? (
+              <BackgroundCarousel imageUrls={imageUrls} opacity={100} interval={4000} />
+            ) : (
               <Image 
                 src="/grassroots-real.jpg" 
                 alt="BHARATIYA KRIDA VAIBHAVAM Team" 
                 fill 
-                className="object-cover hover:scale-105 transition-transform duration-700" 
+                className="object-cover" 
               />
-            </div>
+            )}
           </div>
         </div>
       </section>
