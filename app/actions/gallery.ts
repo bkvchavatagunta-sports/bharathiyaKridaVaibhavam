@@ -19,3 +19,17 @@ export async function addGalleryImage(url: string, category: string = "General")
   
   return { success: true };
 }
+
+export async function deleteGalleryImage(id: string) {
+  if (!id) return { success: false };
+
+  await prisma.galleryImage.delete({
+    where: { id }
+  });
+
+  revalidatePath("/");
+  revalidatePath("/gallery");
+  revalidatePath("/admin/gallery");
+  
+  return { success: true };
+}
