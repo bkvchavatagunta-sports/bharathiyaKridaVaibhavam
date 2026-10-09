@@ -41,7 +41,7 @@ export default async function Home() {
         <div className="container relative z-10 mx-auto px-4 text-center space-y-8 max-w-4xl">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white backdrop-blur-md">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            <span className="text-sm font-semibold tracking-wider">ANNUAL SPORTS MEET 2026</span>
+            <span className="text-sm font-semibold tracking-wider">SPORTS FOR UNITY</span>
           </div>
           <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-tight">
             BHARATIYA KRIDA <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">VAIBHAVAM</span>
@@ -58,11 +58,6 @@ export default async function Home() {
             <Link href="/find-registration">
               <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8 py-6 h-auto">
                 Download Your Pass
-              </Button>
-            </Link>
-            <Link href="/hall-of-fame">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-6 h-auto border-white text-white hover:bg-white hover:text-black">
-                Hall of Fame
               </Button>
             </Link>
           </div>
