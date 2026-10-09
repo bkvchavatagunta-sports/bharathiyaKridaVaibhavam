@@ -121,11 +121,13 @@ model DiscountCode {
 }
 
 model Sponsor {
-  id       String  @id @default(cuid())
-  name     String
-  tier     String  // Title, Gold, Associate, Patron
-  logoUrl  String
-  website  String?
+  id          String   @id @default(cuid())
+  name        String
+  location    String   // From
+  designation String   // Designation
+  amount      Float    // Amount sponsored
+  isVisible   Boolean  @default(true) // Hide/visible toggle
+  createdAt   DateTime @default(now())
 }
 
 model Biography {

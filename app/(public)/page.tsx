@@ -45,6 +45,12 @@ export default async function Home() {
     ? dbHeroImages.map(img => img.imageUrl) 
     : ['/hero-bg.jpg'];
 
+  const topSponsors = await prisma.sponsor.findMany({
+    where: { isVisible: true },
+    orderBy: { amount: 'desc' },
+    take: 5
+  });
+
   return (
     <div className="flex flex-col gap-16 pb-24">
       {/* Hero Section */}
@@ -227,19 +233,26 @@ export default async function Home() {
           <h2 className="text-3xl font-bold tracking-tight">Supported By Our Patrons</h2>
           <p className="text-muted-foreground text-lg">Thank you to the community and local businesses who make this possible.</p>
         </div>
-        <div className="flex flex-wrap justify-center gap-16 items-center opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
-          <div className="flex flex-col items-center gap-2">
-            <div className="text-2xl font-black italic">XYZ Sports Gear</div>
-            <span className="text-sm font-bold text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full">Gold Sponsor (₹50k)</span>
+        
+        {topSponsors.length > 0 ? (
+          <div className="flex flex-wrap justify-center gap-16 items-center">
+            {topSponsors.map(sponsor => (
+              <div key={sponsor.id} className="flex flex-col items-center gap-2">
+                <div className="text-2xl font-black">{sponsor.name}</div>
+                <span className="text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+                  {sponsor.designation} (₹{sponsor.amount.toLocaleString()})
+                </span>
+              </div>
+            ))}
           </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="text-2xl font-bold uppercase tracking-widest text-primary">Village Agro Bank</div>
-            <span className="text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full">Title Sponsor (₹1L)</span>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <div className="text-2xl font-serif">Sharma & Sons Mills</div>
-            <span className="text-sm font-bold text-gray-600 bg-gray-100 px-3 py-1 rounded-full">Associate Sponsor (₹25k)</span>
-          </div>
+        ) : (
+          <p className="text-muted-foreground italic">No sponsors listed yet.</p>
+        )}
+
+        <div className="pt-4">
+          <Link href="/sponsors">
+            <Button variant="link" className="text-primary font-bold">View all sponsors & patrons →</Button>
+          </Link>
         </div>
       </section>
     </div>
