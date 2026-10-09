@@ -53,8 +53,18 @@ export default async function PassPage({ params }: { params: Promise<{ id: strin
         <div className="p-8">
           <div className="flex justify-between items-end border-b pb-4 mb-6">
             <h3 className="text-xl font-bold text-gray-800 uppercase tracking-widest">Participant Details</h3>
-            <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border ${reg.paymentStatus === "VERIFIED" ? "bg-green-100 text-green-800 border-green-300" : "bg-yellow-100 text-yellow-800 border-yellow-300"}`}>
-              Entry Fee: {reg.paymentStatus === "VERIFIED" ? "Paid" : "Pending"}
+            <span className={`text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider border ${
+              reg.paymentStatus === "FREE" ? "bg-gray-100 text-gray-800 border-gray-300" :
+              reg.paymentStatus === "VERIFIED" ? "bg-green-100 text-green-800 border-green-300" : 
+              reg.paymentStatus === "REJECTED" ? "bg-red-100 text-red-800 border-red-300" :
+              "bg-yellow-100 text-yellow-800 border-yellow-300"
+            }`}>
+              Entry Fee: {
+                reg.paymentStatus === "FREE" ? "Free" :
+                reg.paymentStatus === "VERIFIED" ? "Paid" : 
+                reg.paymentStatus === "REJECTED" ? "Not Paid" :
+                "Pending (Admin Confirmation)"
+              }
             </span>
           </div>
 

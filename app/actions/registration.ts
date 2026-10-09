@@ -39,7 +39,7 @@ export async function submitRegistration(data: any) {
       coachName: data.coachName,
       playerNames: data.playerNames || [],
       finalFee: data.finalFee,
-      paymentStatus: data.paymentMode === 'UPI' ? "PENDING" : "FREE",
+      paymentStatus: data.finalFee === 0 ? "FREE" : "PENDING",
       paymentProofUrl: data.proofUrl,
     }
   });
@@ -77,10 +77,10 @@ export async function findRegistration(query: { regNo?: string; name?: string; p
   return null;
 }
 
-export async function verifyPayment(registrationId: string) {
+export async function updatePaymentStatus(registrationId: string, status: "PENDING" | "VERIFIED" | "REJECTED") {
   await prisma.registration.update({
     where: { id: registrationId },
-    data: { paymentStatus: "VERIFIED" }
+    data: { paymentStatus: status }
   });
   revalidatePath("/admin/registrations");
 }

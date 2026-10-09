@@ -31,6 +31,11 @@ export default async function Home() {
   });
   const imageUrls = dbImages.map(img => img.imageUrl);
 
+  const totalRegistrations = await prisma.registration.count();
+  const displayAthletes = 1500 + totalRegistrations;
+  const totalEvents = await prisma.event.count();
+  const displayEvents = 3 + totalEvents;
+
   return (
     <div className="flex flex-col gap-16 pb-24">
       {/* Hero Section */}
@@ -68,25 +73,25 @@ export default async function Home() {
       <section className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2015</h2>
+            <h2 className="text-4xl font-black">Nurturing Grassroots Talent Since 2022</h2>
             <p className="text-muted-foreground text-lg leading-relaxed">
-              We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM hosts over 10,000+ rural athletes across 15+ disciplines.
+              We started as a small committee of passionate athletes. Today, BHARATIYA KRIDA VAIBHAVAM a local hosts over {displayAthletes}+ rural athletes from around Andhra Pradesh across {displayEvents} disciplines. And we are looking forward with big success.
             </p>
             <div className="grid grid-cols-3 gap-6 pt-6 border-t">
               <div className="text-center space-y-2">
                 <Trophy className="w-8 h-8 mx-auto text-yellow-500" />
-                <h4 className="font-bold text-2xl">50+</h4>
+                <h4 className="font-bold text-2xl">{displayEvents}</h4>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Events</p>
               </div>
               <div className="text-center space-y-2">
                 <Users className="w-8 h-8 mx-auto text-blue-500" />
-                <h4 className="font-bold text-2xl">10k+</h4>
+                <h4 className="font-bold text-2xl">{displayAthletes}+</h4>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider">Athletes</p>
               </div>
               <div className="text-center space-y-2">
                 <Medal className="w-8 h-8 mx-auto text-green-500" />
-                <h4 className="font-bold text-2xl">200+</h4>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">Medalists</p>
+                <h4 className="font-bold text-2xl">60+</h4>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Awards</p>
               </div>
             </div>
           </div>

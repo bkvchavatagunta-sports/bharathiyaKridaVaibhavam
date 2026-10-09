@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Trash2, Eye } from "lucide-react";
-import { verifyPayment, deleteRegistration } from "@/app/actions/registration";
+import { updatePaymentStatus, deleteRegistration } from "@/app/actions/registration";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 function DeleteButton({ id, onDelete }: { id: string, onDelete: (id: string) => void }) {
@@ -49,8 +49,8 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleVerify = async (id: string) => {
-    await verifyPayment(id);
+  const handleStatusChange = async (id: string, status: "PENDING" | "VERIFIED" | "REJECTED") => {
+    await updatePaymentStatus(id, status);
   };
 
   const handleDelete = async (id: string) => {
@@ -126,7 +126,7 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
                                   </DialogHeader>
                                   <img src={reg.paymentProofUrl} alt="Proof" className="w-full h-auto rounded-lg" />
                                   {reg.paymentStatus === "PENDING" && (
-                                    <Button onClick={() => handleVerify(reg.id)} className="w-full font-bold">Verify & Approve</Button>
+                                    <Button onClick={() => handleStatusChange(reg.id, "VERIFIED")} className="w-full font-bold">Verify & Approve</Button>
                                   )}
                                 </DialogContent>
                               </Dialog>
@@ -135,14 +135,25 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
                             )}
                           </TableCell>
                           <TableCell>
-                            <Badge className={reg.paymentStatus === "VERIFIED" ? "bg-green-500 hover:bg-green-600" : "bg-yellow-500 hover:bg-yellow-600"}>
-                              {reg.paymentStatus}
-                            </Badge>
+                            {reg.paymentStatus === "FREE" ? (
+                              <Badge className="bg-gray-500">FREE</Badge>
+                            ) : (
+                              <select 
+                                className={`text-xs font-bold rounded-md px-2 py-1 border-0 focus:ring-2 ${
+                                  reg.paymentStatus === "VERIFIED" ? "bg-green-100 text-green-800" :
+                                  reg.paymentStatus === "REJECTED" ? "bg-red-100 text-red-800" :
+                                  "bg-yellow-100 text-yellow-800"
+                                }`}
+                                value={reg.paymentStatus}
+                                onChange={(e) => handleStatusChange(reg.id, e.target.value as any)}
+                              >
+                                <option value="PENDING">PENDING</option>
+                                <option value="VERIFIED">PAID (VERIFIED)</option>
+                                <option value="REJECTED">NOT PAID</option>
+                              </select>
+                            )}
                           </TableCell>
                           <TableCell className="text-right flex items-center justify-end gap-2">
-                            {reg.paymentStatus === "PENDING" && (
-                              <Button size="sm" variant="secondary" onClick={() => handleVerify(reg.id)}>Approve</Button>
-                            )}
                             <DeleteButton id={reg.id} onDelete={handleDelete} />
                           </TableCell>
                         </TableRow>
