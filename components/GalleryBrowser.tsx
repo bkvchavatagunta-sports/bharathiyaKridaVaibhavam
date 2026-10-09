@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Folder, Image as ImageIcon, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { GalleryGrid } from "@/components/GalleryGrid";
@@ -14,6 +14,20 @@ type GalleryImage = {
 export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
   const [view, setView] = useState<"MENU" | "ALL" | "CATEGORIES" | "CATEGORY_VIEW">("MENU");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  // Animation state for "All Photos" thumbnail crossfade
+  const [currentThumbIndex, setCurrentThumbIndex] = useState(0);
+
+  // Grab the 4 latest images for the slideshow thumbnail
+  const latestThumbnails = images.slice(0, 4).map(img => img.imageUrl);
+  
+  useEffect(() => {
+    if (latestThumbnails.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentThumbIndex((prev) => (prev + 1) % latestThumbnails.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [latestThumbnails.length]);
 
   // Derive categories
   const categoriesMap = new Map<string, number>();
@@ -28,31 +42,47 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
         <h1 className="text-4xl font-black text-center mb-10">Moments of Glory</h1>
         <div className="grid md:grid-cols-2 gap-6">
           <Card 
-            className="cursor-pointer hover:shadow-lg transition-all hover:border-primary/50 group"
+            className="cursor-pointer hover:shadow-lg transition-all hover:border-primary/50 group relative overflow-hidden min-h-[300px] flex items-center justify-center border-2"
             onClick={() => setView("ALL")}
           >
-            <CardContent className="p-12 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                <ImageIcon className="w-10 h-10 text-primary" />
+            {/* Animated Background Slideshow */}
+            {latestThumbnails.map((src, idx) => (
+              <div 
+                key={src}
+                className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${currentThumbIndex === idx ? 'opacity-40 scale-105' : 'opacity-0 scale-100'}`}
+                style={{ backgroundImage: `url(${src})`, transitionProperty: 'opacity, transform' }}
+              />
+            ))}
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+
+            <CardContent className="relative z-10 p-8 flex flex-col items-center text-center space-y-4 text-white">
+              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <ImageIcon className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">View All Photos</h3>
-                <p className="text-muted-foreground mt-2">Browse every incredible moment captured.</p>
+                <h3 className="text-3xl font-black drop-shadow-md">All Photos</h3>
+                <p className="text-white/80 mt-2 font-medium">Browse every incredible moment captured.</p>
               </div>
             </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer hover:shadow-lg transition-all hover:border-blue-500/50 group"
+            className="cursor-pointer hover:shadow-lg transition-all hover:border-blue-500/50 group relative overflow-hidden min-h-[300px] flex items-center justify-center border-2"
             onClick={() => setView("CATEGORIES")}
           >
-            <CardContent className="p-12 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                <Folder className="w-10 h-10 text-blue-600" />
+            <div 
+                className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"
+                style={{ backgroundImage: `url(https://picsum.photos/seed/sportscollage/800/600)` }}
+            />
+            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+
+            <CardContent className="relative z-10 p-8 flex flex-col items-center text-center space-y-4 text-white">
+              <div className="w-16 h-16 bg-blue-500/40 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Folder className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-bold">View Category Wise</h3>
-                <p className="text-muted-foreground mt-2">Browse albums by sport and event type.</p>
+                <h3 className="text-3xl font-black drop-shadow-md">Category Wise</h3>
+                <p className="text-white/80 mt-2 font-medium">Browse albums by sport and event type.</p>
               </div>
             </CardContent>
           </Card>
@@ -75,18 +105,21 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
           {categories.map((cat) => (
             <Card 
               key={cat.name} 
-              className="cursor-pointer hover:shadow-md transition-all group border-muted"
+              className="cursor-pointer hover:shadow-lg transition-all group border-muted relative overflow-hidden min-h-[200px] flex items-end"
               onClick={() => {
                 setSelectedCategory(cat.name);
                 setView("CATEGORY_VIEW");
               }}
             >
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                <Folder className="w-12 h-12 text-yellow-500 group-hover:scale-110 transition-transform" />
-                <div>
-                  <h4 className="font-bold text-lg">{cat.name}</h4>
-                  <p className="text-sm text-muted-foreground">{cat.count} Photos</p>
-                </div>
+              <div 
+                className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:scale-110 transition-transform duration-700"
+                style={{ backgroundImage: `url(https://picsum.photos/seed/${cat.name}Sports/400/300)` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+
+              <CardContent className="relative z-10 p-4 w-full text-white">
+                <h4 className="font-black text-xl drop-shadow-md">{cat.name}</h4>
+                <p className="text-sm text-white/80 font-bold">{cat.count} Photos</p>
               </CardContent>
             </Card>
           ))}
