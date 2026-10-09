@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock } from "lucide-react";
+import { Lock, X } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,9 +37,19 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center p-4 bg-muted/20">
-      <Card className="w-full max-w-md shadow-2xl border-0 overflow-hidden">
-        <div className="bg-primary p-6 text-white text-center">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/20">
+      <Card className="w-full max-w-md shadow-2xl border-0 overflow-hidden relative">
+        <Button 
+          type="button"
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-4 right-4 z-10 rounded-full text-white hover:bg-white/20 hover:text-white"
+          onClick={() => router.push('/')}
+        >
+          <X className="w-5 h-5" />
+        </Button>
+
+        <div className="bg-primary p-6 text-white text-center pt-8">
           <Lock className="w-12 h-12 mx-auto mb-4 opacity-80" />
           <CardTitle className="text-2xl font-black">Committee Login</CardTitle>
           <CardDescription className="text-primary-foreground/80 mt-1">
