@@ -2,7 +2,8 @@ import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
 import { Download } from "lucide-react";
 import Image from "next/image";
-import PrintButton from "./PrintButton"; // We will create this
+import PrintButton from "./PrintButton";
+import { format } from "date-fns"; // We will create this
 
 export default async function PassPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
@@ -43,7 +44,7 @@ export default async function PassPage({ params }: { params: Promise<{ id: strin
            <div>
              <h2 className="text-2xl font-black text-gray-900">{reg.event.title}</h2>
              <div className="text-gray-600 font-medium mt-1 flex flex-wrap gap-x-4">
-               <span>🗓️ {reg.event.startDate.toLocaleDateString()}</span>
+               <span>🗓️ {format(reg.event.startDate, 'dd/MM/yyyy')}</span>
                <span>📍 {reg.event.venue}</span>
              </div>
            </div>

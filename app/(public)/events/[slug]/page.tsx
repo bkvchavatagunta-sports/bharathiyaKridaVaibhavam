@@ -4,6 +4,7 @@ import { Calendar, MapPin, Trophy, Users, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
+import { format } from "date-fns";
 
 export default async function EventDetails({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
@@ -87,19 +88,6 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
             </div>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-bold mb-4">Rules & Guidelines</h2>
-            <ul className="space-y-3 text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                <span>Participants must bring a valid age-proof ID on the day of the event.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
-                <span>Umpire/Referee decisions will be final and binding.</span>
-              </li>
-            </ul>
-          </section>
         </div>
 
         <div className="space-y-6">
@@ -111,7 +99,7 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
                 <Calendar className="w-5 h-5 text-primary" />
                 <div>
                   <p className="font-medium">Date</p>
-                  <p className="text-sm text-muted-foreground">{event.startDate.toLocaleDateString()} to {event.endDate.toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">{format(event.startDate, 'dd/MM/yyyy')} to {format(event.endDate, 'dd/MM/yyyy')}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">

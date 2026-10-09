@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { deleteGalleryImage } from "@/app/actions/gallery";
+import { format } from "date-fns";
 
 type GalleryImage = {
   id: string;
@@ -58,7 +59,7 @@ export function GalleryGridAdmin({ images }: { images: GalleryImage[] }) {
           <div className="p-3 bg-white flex justify-between items-center border-t">
             <Badge variant="secondary" className="font-semibold text-xs">{img.category}</Badge>
             <span className="text-xs text-muted-foreground font-medium">
-              {new Date(img.uploadedAt).toLocaleDateString()}
+              {format(new Date(img.uploadedAt), 'dd/MM/yyyy')}
             </span>
           </div>
         </div>

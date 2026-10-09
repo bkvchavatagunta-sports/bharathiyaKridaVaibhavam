@@ -7,6 +7,7 @@ import { GalleryCarousel } from "@/components/GalleryCarousel";
 import { BackgroundCarousel } from "@/components/BackgroundCarousel";
 import Image from "next/image";
 import prisma from "@/lib/db";
+import { format } from "date-fns";
 
 export default async function Home() {
   const fiveDaysAgo = new Date();
@@ -189,7 +190,7 @@ export default async function Home() {
                     <CardContent className="space-y-4 flex-1">
                       <div className="flex items-center text-sm text-muted-foreground gap-2 bg-muted/50 p-2 rounded-md">
                         <Calendar className="w-4 h-4 text-blue-500" />
-                        <span className="font-medium">{event.startDate.toLocaleDateString()}</span>
+                        <span className="font-medium">{format(event.startDate, 'dd/MM/yyyy')}</span>
                       </div>
                       <div className="flex items-center text-sm text-muted-foreground gap-2 bg-muted/50 p-2 rounded-md">
                         <MapPin className="w-4 h-4 text-red-500" />

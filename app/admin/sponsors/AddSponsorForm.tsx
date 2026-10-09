@@ -12,10 +12,16 @@ export function AddSponsorForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    await addSponsor(formData);
-    e.currentTarget.reset();
-    setLoading(false);
+    try {
+      const form = e.currentTarget;
+      const formData = new FormData(form);
+      await addSponsor(formData);
+      form.reset();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

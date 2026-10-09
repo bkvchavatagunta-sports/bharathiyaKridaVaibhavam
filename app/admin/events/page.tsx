@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deleteEvent, updateEventStatus } from "@/app/actions/event";
+import { format } from "date-fns";
 
 export default async function AdminEventsPage() {
   const events = await prisma.event.findMany({ orderBy: { createdAt: 'desc' } });
@@ -82,7 +83,7 @@ export default async function AdminEventsPage() {
                   <div className="space-y-2 pt-2">
                     <div className="flex items-center text-sm text-muted-foreground bg-muted/30 p-2 rounded-md">
                       <Calendar className="w-4 h-4 mr-3 text-blue-500" />
-                      <span className="font-medium">{event.startDate.toLocaleDateString()}</span>
+                      <span className="font-medium">{format(event.startDate, 'dd/MM/yyyy')}</span>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground bg-muted/30 p-2 rounded-md">
                       <MapPin className="w-4 h-4 mr-3 text-red-500" />

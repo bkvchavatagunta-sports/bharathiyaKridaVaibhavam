@@ -5,6 +5,7 @@ import { Calendar, MapPin } from "lucide-react";
 import Image from "next/image";
 import prisma from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 export default async function EventsPage() {
   const fiveDaysAgo = new Date();
@@ -82,7 +83,7 @@ export default async function EventsPage() {
                 <CardContent className="space-y-4 flex-1">
                   <div className="flex items-center text-sm text-muted-foreground gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>{event.startDate.toLocaleDateString()}</span>
+                    <span>{format(event.startDate, 'dd/MM/yyyy')}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground gap-2">
                     <MapPin className="w-4 h-4" />

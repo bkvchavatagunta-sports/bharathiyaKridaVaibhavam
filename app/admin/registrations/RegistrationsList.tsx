@@ -113,7 +113,9 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
                             )}
                           </TableCell>
                           <TableCell>{reg.user.phone}</TableCell>
-                          <TableCell>{reg.sportSubCategory} ({reg.ageGroup})</TableCell>
+                          <TableCell>
+                            {reg.sportSubCategory} {reg.ageGroup ? `(${reg.ageGroup})` : ""}
+                          </TableCell>
                           <TableCell>
                             {reg.paymentProofUrl ? (
                               <Dialog>

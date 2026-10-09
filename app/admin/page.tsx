@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/db";
 import { GalleryUploader } from "@/components/GalleryUploader";
+import { format } from "date-fns";
 
 export default async function AdminDashboard() {
   const activeEventsCount = await prisma.event.count({
@@ -104,7 +105,7 @@ export default async function AdminDashboard() {
                   <TableRow key={reg.id}>
                     <TableCell className="font-bold">{reg.isTeamRegistration ? reg.teamName : reg.user.name}</TableCell>
                     <TableCell className="text-muted-foreground text-sm">{reg.event.title}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{reg.registeredAt.toLocaleDateString()}</TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{format(reg.registeredAt, 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right font-bold text-green-600">{reg.paymentStatus}</TableCell>
                   </TableRow>
                 ))}
