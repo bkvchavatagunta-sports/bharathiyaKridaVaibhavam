@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, CalendarCheck, IndianRupee, Trophy, Info } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import prisma from "@/lib/db";
 import { GalleryUploader } from "@/components/GalleryUploader";
 
@@ -112,14 +113,23 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Gallery Upload Widget */}
+        {/* Photos Management Widget */}
         <Card className="border-0 shadow-md">
           <CardHeader className="border-b bg-muted/10">
-            <CardTitle>Event Gallery Upload</CardTitle>
-            <CardDescription>Upload photos for the landing page carousel.</CardDescription>
+            <CardTitle>Event Gallery</CardTitle>
+            <CardDescription>Manage your public photos.</CardDescription>
           </CardHeader>
-          <CardContent className="p-6">
-            <GalleryUploader />
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <Trophy className="w-8 h-8 text-blue-600" />
+            </div>
+            <div>
+              <p className="font-bold text-lg text-gray-800">Upload & Manage</p>
+              <p className="text-sm text-muted-foreground">Keep the landing page updated.</p>
+            </div>
+            <a href="/admin/gallery" className="w-full">
+              <Button className="w-full font-bold">Go to Photos</Button>
+            </a>
           </CardContent>
         </Card>
       </div>

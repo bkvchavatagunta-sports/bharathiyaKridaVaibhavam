@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, Users } from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Trophy } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
 
 export function AdminSidebar() {
@@ -38,6 +38,12 @@ export function AdminSidebar() {
           className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${isActive('/admin/registrations') ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-muted/50'}`}
         >
           <Users className="w-5 h-5" /> Registrations
+        </Link>
+        <Link 
+          href="/admin/gallery" 
+          className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${isActive('/admin/gallery') ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-muted/50'}`}
+        >
+          <Trophy className="w-5 h-5" /> Photos
         </Link>
         <div className="pt-8 mt-8 border-t border-dashed">
            <SignOutButton />
