@@ -30,7 +30,10 @@ export function Navbar() {
           <Link href="/gallery" className="transition-colors hover:text-foreground/80 text-foreground/60">
             Gallery
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ml-4">
+            <Link href="/login" className="transition-colors hover:text-foreground/80 text-foreground/60 font-semibold">
+              Login
+            </Link>
             <Link href="/events">
               <Button>Register</Button>
             </Link>
@@ -60,6 +63,9 @@ export function Navbar() {
             </Link>
             <Link href="/gallery" onClick={() => setMobileOpen(false)} className="py-2 border-b">
               Gallery
+            </Link>
+            <Link href="/login" onClick={() => setMobileOpen(false)} className="py-2 border-b">
+              Login
             </Link>
             <Link href="/events" onClick={() => setMobileOpen(false)} className="py-2">
               <Button className="w-full">Register</Button>
