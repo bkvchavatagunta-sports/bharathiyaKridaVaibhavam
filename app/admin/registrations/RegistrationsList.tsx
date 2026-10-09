@@ -41,7 +41,7 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
     
     acc[eventKey][categoryKey].push(reg);
     return acc;
-  }, {} as Record<string, Record<string, typeof registrations>>);
+  }, {} as Record<string, Record<string, any[]>>);
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
@@ -71,7 +71,7 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
         <div key={eventName} className="space-y-4">
           <h2 className="text-2xl font-black text-primary border-b pb-2">{eventName}</h2>
           
-          {Object.entries(categories).map(([sportCategory, regs]) => {
+          {Object.entries(categories as Record<string, any[]>).map(([sportCategory, regs]) => {
             const groupKey = `${eventName}-${sportCategory}`;
             const isExpanded = expandedGroups[groupKey];
             
@@ -102,7 +102,7 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {regs.map((reg) => (
+                      {regs.map((reg: any) => (
                         <TableRow key={reg.id}>
                           <TableCell className="font-mono font-bold">{reg.registrationNo}</TableCell>
                           <TableCell className="font-bold">

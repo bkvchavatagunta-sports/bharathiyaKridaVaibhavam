@@ -253,7 +253,7 @@ export function RegistrationForm({ event }: { event: any }) {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <div className="flex justify-between"><Label className="font-semibold">Date of Birth *</Label>{age !== null && <span className="text-xs font-bold text-primary">{age} yrs</span>}</div>
-                <Input required type="date" max={maxDob} value={dob} onChange={handleDobChange} className="h-12" />
+                <Input required type="date" max={maxDobStr} value={dob} onChange={handleDobChange} className="h-12" />
               </div>
               <div className="space-y-2">
                 <Label className="font-semibold">Gender *</Label>
