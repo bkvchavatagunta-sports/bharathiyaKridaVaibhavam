@@ -92,7 +92,7 @@ export default async function Home() {
           </div>
           <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
             <Image 
-              src="/grassroots-bg.jpg" 
+              src="/grassroots-real.jpg" 
               alt="BHARATIYA KRIDA VAIBHAVAM Team" 
               fill 
               className="object-cover" 
