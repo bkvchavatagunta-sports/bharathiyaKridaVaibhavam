@@ -143,4 +143,5 @@ model GalleryImage {
   caption   String?
   year      Int
   uploadedAt DateTime @default(now())
+  category   String   @default("General")
 }
