@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X, UploadCloud, CheckCircle, MapPin, Plus, Trash2, Edit2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,181 +23,185 @@ export function RegistrationForm({ event }: { event: any }) {
   const [location, setLocation] = useState("");
   const [locating, setLocating] = useState(false);
   const [gender, setGender] = useState("");
-  const [category, setCategory] = useState(event.sportType);
-  const [ageGroup, setAgeGroup] = useState("Open");
+
+  const [selectedSport, setSelectedSport] = useState(event.sportType?.[0] || "General");
+  const [category, setCategory] = useState(event.subCategories?.[0] || "");
+  const [ageGroup, setAgeGroup] = useState(event.ageGroups?.[0] || "Open");
+
+  useEffect(() => {
+    if (event.subCategories?.length === 0) setCategory(selectedSport);
+  }, [selectedSport, event.subCategories]);
 
   // Individual State
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
 
   // Team Registration State
-  const isTeamSport = ["Football", "Hockey", "Kabaddi", "Volleyball"].includes(event.sportType);
-  const minPlayers = event.sportType === "Kabaddi" ? 7 : event.sportType === "Volleyball" ? 6 : 11;
-  const maxPlayers = event.sportType === "Kabaddi" ? 12 : event.sportType === "Volleyball" ? 12 : 15;
+  const isTeamSport = ["Football", "Hockey", "Kabaddi", "Volleyball"].includes(selectedSport);
+  const minPlayers = selectedSport === "Kabaddi" ? 7 : selectedSport === "Volleyball" ? 6 : 11;
+  const maxPlayers = selectedSport === "Kabaddi" ? 12 : selectedSport === "Volleyball" ? 12 : 15;
   const [playerNames, setPlayerNames] = useState<string[]>(Array(minPlayers).fill(""));
   const [teamName, setTeamName] = useState("");
   const [coachName, setCoachName] = useState("");
   const [captainName, setCaptainName] = useState("");
   const [viceCaptainName, setViceCaptainName] = useState("");
 
-  const maxDob = new Date().toISOString().split("T")[0];
+  const maxDob = new Date();
+  maxDob.setFullYear(maxDob.getFullYear() - 5);
+  const maxDobStr = maxDob.toISOString().split("T")[0];
 
   const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setDob(val);
-    if (val) {
-      const birthDate = new Date(val);
-      const eventDate = new Date(event.startDate || Date.now());
-      let calculatedAge = eventDate.getFullYear() - birthDate.getFullYear();
-      const m = eventDate.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && eventDate.getDate() < birthDate.getDate())) {
-        calculatedAge--;
-      }
-      setAge(calculatedAge);
-    } else {
-      setAge(null);
-    }
-  };
-
-  const getCurrentLocation = () => {
-    setLocating(true);
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-        const data = await res.json();
-        setLocation(data.display_name || "Unknown Location");
-        setLocating(false);
-      }, () => {
-        setLocating(false);
-      });
-    } else {
-      setLocating(false);
-    }
+    setDob(e.target.value);
+    const today = new Date();
+    const birthDate = new Date(e.target.value);
+    let a = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) a--;
+    setAge(a);
   };
 
   const handleAddPlayer = () => { if (playerNames.length < maxPlayers) setPlayerNames([...playerNames, ""]); };
-  const handleRemovePlayer = (index: number) => {
-    if (playerNames.length > minPlayers) {
-      const newPlayers = [...playerNames];
-      newPlayers.splice(index, 1);
-      setPlayerNames(newPlayers);
-    }
-  };
-  const handlePlayerChange = (index: number, val: string) => {
-    const newPlayers = [...playerNames];
-    newPlayers[index] = val;
-    setPlayerNames(newPlayers);
+  const handleRemovePlayer = (index: number) => { if (playerNames.length > minPlayers) setPlayerNames(playerNames.filter((_, i) => i !== index)); };
+  const handlePlayerChange = (index: number, value: string) => { const newP = [...playerNames]; newP[index] = value; setPlayerNames(newP); };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) return alert("Geolocation is not supported by your browser");
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`);
+          const data = await res.json();
+          setLocation(data.address.village || data.address.town || data.address.city || data.display_name.split(",")[0]);
+        } catch(e) {}
+        setLocating(false);
+      },
+      () => { alert("Failed to get location"); setLocating(false); }
+    );
   };
 
-  const handlePreviewSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePreviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (age !== null && age < 5) return alert("Participant must be at least 5 years old.");
-    if (paymentMode === 'UPI' && !proofUrl) return alert("Please upload your UPI payment screenshot.");
+    if (paymentMode === "UPI" && !proofUrl && event.entryFee > 0) return alert("Please upload UPI payment screenshot.");
     setStep("PREVIEW");
   };
 
   const handleFinalSubmit = async () => {
     setLoading(true);
+    
     const data = {
       eventId: event.id,
-      sportType: event.sportType,
-      name: isTeamSport ? captainName : name,
-      phone,
-      location,
-      age: age || 0,
-      gender,
+      sportType: selectedSport,
       sportSubCategory: category,
-      isTeamRegistration: isTeamSport,
-      teamName,
-      captainName,
-      viceCaptainName,
-      coachName,
-      playerNames,
+      ageGroup: ageGroup,
+      age: Number(age),
+      gender,
+      location,
+      phone,
       finalFee: event.entryFee,
       paymentMode,
-      proofUrl
+      proofUrl: paymentMode === "UPI" && proofUrl ? proofUrl : null,
+      isTeamRegistration: isTeamSport,
+      name: name,
+      teamName: isTeamSport ? teamName : null,
+      captainName: isTeamSport ? captainName : null,
+      viceCaptainName: isTeamSport ? viceCaptainName : null,
+      coachName: isTeamSport ? coachName : null,
+      playerNames: isTeamSport ? playerNames.filter(n => n.trim() !== "") : []
     };
-    
+
     const res = await submitRegistration(data);
-    if (res.success) {
-      router.replace(`/events/${event.slug}/register/success?regId=${res.regId}`);
+    
+    if (res.success && res.regId) {
+      router.push(`/pass/${res.regId}`);
+    } else {
+      alert("Registration failed. Please try again.");
+      setLoading(false);
     }
   };
 
   if (step === "PREVIEW") {
     return (
-      <div className="max-w-3xl mx-auto mt-8">
-        <Card className="shadow-2xl border-0 relative overflow-hidden">
-          <CardHeader className="bg-primary/5 border-b pb-8 rounded-t-xl">
-            <CardTitle className="text-3xl font-black text-primary">Review Registration</CardTitle>
-            <CardDescription className="text-base font-medium">Please verify your details before confirming.</CardDescription>
-          </CardHeader>
-          <CardContent className="pt-8 space-y-8">
-            <div className="grid md:grid-cols-2 gap-y-6 gap-x-12 bg-muted/10 p-6 rounded-xl border">
-              <div><span className="block text-sm text-muted-foreground font-semibold">Event</span><span className="font-bold text-lg">{event.title}</span></div>
-              <div><span className="block text-sm text-muted-foreground font-semibold">Sport Category</span><span className="font-bold text-lg">{category} ({ageGroup})</span></div>
-              {!isTeamSport && (
-                <>
-                  <div><span className="block text-sm text-muted-foreground font-semibold">Full Name</span><span className="font-bold text-lg">{name}</span></div>
-                  <div><span className="block text-sm text-muted-foreground font-semibold">Gender & Age</span><span className="font-bold text-lg">{gender}, {age} yrs</span></div>
-                </>
-              )}
-              <div><span className="block text-sm text-muted-foreground font-semibold">Phone Number</span><span className="font-bold text-lg">{phone}</span></div>
-              <div><span className="block text-sm text-muted-foreground font-semibold">Location</span><span className="font-bold text-lg">{location}</span></div>
-            </div>
-
-            {isTeamSport && (
-              <div className="bg-muted/10 p-6 rounded-xl border space-y-4">
-                <h3 className="font-bold text-xl text-primary border-b pb-2">Team Details</h3>
-                <div className="grid md:grid-cols-2 gap-y-4">
-                  <div><span className="block text-sm text-muted-foreground font-semibold">Team Name</span><span className="font-bold text-lg">{teamName}</span></div>
-                  <div><span className="block text-sm text-muted-foreground font-semibold">Captain</span><span className="font-bold text-lg">{captainName}</span></div>
-                  <div><span className="block text-sm text-muted-foreground font-semibold">Vice Captain</span><span className="font-bold text-lg">{viceCaptainName}</span></div>
-                  {coachName && <div><span className="block text-sm text-muted-foreground font-semibold">Coach</span><span className="font-bold text-lg">{coachName}</span></div>}
-                </div>
-                <div className="pt-2">
-                  <span className="block text-sm text-muted-foreground font-semibold mb-2">Squad List ({playerNames.length} Players)</span>
-                  <div className="flex flex-wrap gap-2">
-                    {playerNames.map((p, i) => <span key={i} className="bg-white border px-3 py-1 rounded-md text-sm font-bold shadow-sm">{i+1}. {p}</span>)}
-                  </div>
-                </div>
+      <Card className="shadow-2xl border-0 overflow-hidden max-w-3xl mx-auto border-t-8 border-t-primary">
+        <div className="bg-muted p-6 flex justify-between items-center border-b">
+          <div>
+            <h2 className="text-2xl font-black text-primary">Preview Registration</h2>
+            <p className="text-sm font-medium text-muted-foreground mt-1">Please verify all details before submitting.</p>
+          </div>
+          <Button variant="outline" onClick={() => setStep("FORM")}><Edit2 className="w-4 h-4 mr-2" /> Edit</Button>
+        </div>
+        <CardContent className="p-8 space-y-8">
+          <div className="grid grid-cols-2 gap-y-6 gap-x-8 text-sm">
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Sport</p><p className="font-black text-lg">{selectedSport} - {category}</p></div>
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Age Group</p><p className="font-black text-lg">{ageGroup}</p></div>
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Phone</p><p className="font-black text-lg">{phone}</p></div>
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Location</p><p className="font-bold">{location}</p></div>
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Age / Gender</p><p className="font-bold">{age} yrs / {gender}</p></div>
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Payment</p><p className="font-bold">{event.entryFee === 0 ? "Free Entry" : paymentMode === 'VENUE' ? "Pay at Venue" : "UPI Paid"}</p></div>
+          </div>
+          
+          {isTeamSport ? (
+            <div className="bg-muted/50 p-6 rounded-xl border">
+              <h4 className="font-black text-lg mb-4 text-primary pb-2 border-b">Team: {teamName}</h4>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <p><strong>Captain:</strong> {captainName}</p>
+                <p><strong>Vice Capt:</strong> {viceCaptainName}</p>
+                {coachName && <p className="col-span-2"><strong>Coach:</strong> {coachName}</p>}
               </div>
-            )}
-
-            <div className="bg-muted/10 p-6 rounded-xl border flex items-center justify-between">
               <div>
-                <span className="block text-sm text-muted-foreground font-semibold">Payment Details</span>
-                <span className="font-black text-2xl text-primary">₹{event.entryFee}</span>
-                <span className="block text-sm font-bold mt-1">{paymentMode === 'UPI' ? 'Paid via UPI (Proof Attached)' : 'Will Pay at Venue (Cash)'}</span>
+                <p className="text-xs font-bold uppercase text-muted-foreground mb-2">Squad ({playerNames.filter(n=>n.trim()).length} players)</p>
+                <div className="flex flex-wrap gap-2 text-sm font-medium">
+                  {playerNames.filter(n=>n.trim()).map((p,i) => <span key={i} className="bg-white px-3 py-1 rounded shadow-sm border">{p}</span>)}
+                </div>
               </div>
-              {proofUrl && <img src={proofUrl} alt="Proof" className="w-24 h-24 object-cover rounded-lg border shadow-sm" />}
             </div>
-
-            <div className="flex gap-4 pt-4">
-              <Button type="button" variant="outline" size="lg" className="w-1/3 text-lg h-14" onClick={() => setStep("FORM")}>
-                <Edit2 className="w-5 h-5 mr-2" /> Edit Info
-              </Button>
-              <Button type="button" size="lg" className="w-2/3 text-lg h-14 font-black bg-green-600 hover:bg-green-700 shadow-xl" onClick={handleFinalSubmit} disabled={loading}>
-                {loading ? "Processing..." : <><CheckCircle2 className="w-5 h-5 mr-2" /> Confirm & Register</>}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          ) : (
+            <div><p className="text-muted-foreground font-bold uppercase mb-1">Participant Name</p><p className="font-black text-2xl">{name}</p></div>
+          )}
+          
+          <Button onClick={handleFinalSubmit} disabled={loading} className="w-full h-14 text-xl font-bold shadow-xl">
+            {loading ? "Submitting..." : <><CheckCircle className="w-5 h-5 mr-2" /> Confirm & Generate Pass</>}
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto mt-8">
-      <Card className="shadow-2xl border-0 relative overflow-hidden">
-        <Button variant="ghost" size="icon" className="absolute top-4 right-4 z-10 rounded-full hover:bg-red-50 hover:text-red-600" onClick={() => router.back()}><X className="w-5 h-5" /></Button>
-        <CardHeader className="bg-primary/5 border-b pb-8 rounded-t-xl pr-16">
+    <div className="max-w-4xl mx-auto pb-12">
+      <Card className="shadow-xl border-t-8 border-t-primary">
+        <CardHeader className="bg-muted/20 border-b">
           <CardTitle className="text-3xl font-black text-primary">Register for {event.title}</CardTitle>
           <CardDescription className="text-base font-medium">Fill out your details to secure your spot.</CardDescription>
         </CardHeader>
         <CardContent className="pt-8">
           <form onSubmit={handlePreviewSubmit} className="space-y-8">
+            
+            <div className="grid md:grid-cols-3 gap-6 mb-8 p-6 bg-muted/20 border rounded-xl">
+              <div className="space-y-2">
+                <Label className="font-semibold">Sport *</Label>
+                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={selectedSport} onChange={e=>setSelectedSport(e.target.value)}>
+                  {event.sportType?.map((s: string) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Sub-Category / Event *</Label>
+                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={category} onChange={e=>setCategory(e.target.value)}>
+                  {event.subCategories?.length > 0 ? (
+                    <><option value="">Select Sub-Category</option>{event.subCategories.map((c: string) => <option key={c} value={c}>{c}</option>)}</>
+                  ) : <option value={selectedSport}>{selectedSport}</option>}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label className="font-semibold">Age Group *</Label>
+                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={ageGroup} onChange={e=>setAgeGroup(e.target.value)}>
+                  {event.ageGroups?.length > 0 ? (
+                    <><option value="">Select Age Group</option>{event.ageGroups.map((g: string) => <option key={g} value={g}>{g}</option>)}</>
+                  ) : <option value="Open">Open Category</option>}
+                </select>
+              </div>
+            </div>
             
             {isTeamSport ? (
               <div className="space-y-6">
@@ -255,25 +259,6 @@ export function RegistrationForm({ event }: { event: any }) {
                 <Label className="font-semibold">Gender *</Label>
                 <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={gender} onChange={e=>setGender(e.target.value)}>
                   <option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="font-semibold">Sport Sub-Category *</Label>
-                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={category} onChange={e=>setCategory(e.target.value)}>
-                  {event.subCategories?.length > 0 ? (
-                    <><option value="">Select Sub-Category</option>{event.subCategories.map((c: string) => <option key={c} value={c}>{c}</option>)}</>
-                  ) : <option value={event.sportType}>{event.sportType}</option>}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label className="font-semibold">Age Group *</Label>
-                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={ageGroup} onChange={e=>setAgeGroup(e.target.value)}>
-                  {event.ageGroups?.length > 0 ? (
-                    <><option value="">Select Age Group</option>{event.ageGroups.map((g: string) => <option key={g} value={g}>{g}</option>)}</>
-                  ) : <option value="Open">Open Category</option>}
                 </select>
               </div>
             </div>

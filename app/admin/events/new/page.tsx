@@ -1,72 +1,93 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { createEvent } from "@/app/actions/event";
+import { Plus, X, UploadCloud, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CldUploadWidget } from "next-cloudinary";
-import { UploadCloud, CheckCircle2, ArrowLeft, Plus, X } from "lucide-react";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { CldUploadWidget } from "next-cloudinary";
+import { createEvent } from "@/app/actions/event";
+import { useRouter } from "next/navigation";
 
-export default function CreateEventPage() {
-  const [loading, setLoading] = useState(false);
-  const [bannerUrl, setBannerUrl] = useState("");
-  
-  const [subCategoryInput, setSubCategoryInput] = useState("");
+export default function NewEventPage() {
+  const router = useRouter();
   const [subCategories, setSubCategories] = useState<string[]>([]);
+  const [subCategoryInput, setSubCategoryInput] = useState("");
   
-  const [ageGroupInput, setAgeGroupInput] = useState("");
   const [ageGroups, setAgeGroups] = useState<string[]>([]);
+  const [ageGroupInput, setAgeGroupInput] = useState("");
 
-  const handleAddSubCategory = (e: React.MouseEvent) => {
+  const [sportTypes, setSportTypes] = useState<string[]>([]);
+  const [sportTypeInput, setSportTypeInput] = useState("");
+
+  const [bannerUrl, setBannerUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleAddSubCategory = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (subCategoryInput.trim() && !subCategories.includes(subCategoryInput.trim())) {
       setSubCategories([...subCategories, subCategoryInput.trim()]);
-      setSubCategoryInput("");
     }
+    setSubCategoryInput("");
   };
 
   const handleRemoveSubCategory = (category: string) => {
     setSubCategories(subCategories.filter(c => c !== category));
   };
 
-  const handleAddAgeGroup = (e: React.MouseEvent) => {
+  const handleAddAgeGroup = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (ageGroupInput.trim() && !ageGroups.includes(ageGroupInput.trim())) {
       setAgeGroups([...ageGroups, ageGroupInput.trim()]);
-      setAgeGroupInput("");
     }
+    setAgeGroupInput("");
   };
 
   const handleRemoveAgeGroup = (group: string) => {
     setAgeGroups(ageGroups.filter(g => g !== group));
   };
 
+  const handleAddSportType = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    if (sportTypeInput.trim() && !sportTypes.includes(sportTypeInput.trim())) {
+      setSportTypes([...sportTypes, sportTypeInput.trim()]);
+    }
+    setSportTypeInput("");
+  };
+
+  const handleRemoveSportType = (sport: string) => {
+    setSportTypes(sportTypes.filter(s => s !== sport));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!bannerUrl) return alert("Please upload a banner image");
+    if (sportTypes.length === 0) return alert("Please add at least one Sport Type");
     setLoading(true);
+
     const formData = new FormData(e.currentTarget);
-    formData.set("bannerImage", bannerUrl);
-    formData.set("subCategories", JSON.stringify(subCategories));
-    formData.set("ageGroups", JSON.stringify(ageGroups));
+    formData.append("bannerImage", bannerUrl);
+    formData.append("subCategories", JSON.stringify(subCategories));
+    formData.append("ageGroups", JSON.stringify(ageGroups));
+    formData.append("sportTypes", JSON.stringify(sportTypes));
+
+    const res = await createEvent(formData);
     
-    await createEvent(formData);
+    if (res.success) {
+      router.push("/admin/events");
+    } else {
+      alert("Failed to create event");
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8 bg-white min-h-screen">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/events">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        </Link>
+    <div className="p-8 max-w-4xl mx-auto space-y-8 bg-white rounded-xl shadow-sm border mt-8">
+      <div className="flex items-center justify-between border-b pb-6">
         <div>
-          <h1 className="text-3xl font-black text-primary">Create New Event</h1>
+          <h1 className="text-3xl font-black">Publish New Event</h1>
           <p className="text-muted-foreground mt-1">Fill in the details to publish a new tournament or meet.</p>
         </div>
       </div>
@@ -83,29 +104,43 @@ export default function CreateEventPage() {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="sportType" className="font-bold">Sport Type *</Label>
-            <select id="sportType" name="sportType" required className="flex h-12 w-full rounded-md border border-input bg-background px-3 py-2">
-              <option value="">Select Sport</option>
-              <option value="Athletics">Athletics</option>
-              <option value="Marathon">Marathon</option>
-              <option value="Hockey">Hockey</option>
-              <option value="Football">Football</option>
-              <option value="Kabaddi">Kabaddi</option>
-              <option value="Volleyball">Volleyball</option>
-              <option value="Swimming">Swimming</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="entryFee" className="font-bold">Entry Fee (₹) *</Label>
-            <Input id="entryFee" name="entryFee" type="number" required placeholder="250" className="h-12" min="0" />
-            <p className="text-xs text-muted-foreground">Enter 0 for free events.</p>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="entryFee" className="font-bold">Entry Fee (₹) *</Label>
+          <Input id="entryFee" name="entryFee" type="number" required placeholder="250" className="h-12 w-full md:w-1/2" min="0" />
+          <p className="text-xs text-muted-foreground">Enter 0 for free events.</p>
         </div>
 
-        <div className="p-6 bg-muted/20 border rounded-xl space-y-6">
+        <div className="p-6 bg-muted/20 border rounded-xl space-y-8">
           <div className="space-y-4">
+            <Label className="font-bold">Sport Types (e.g. Football, Athletics, Hockey) *</Label>
+            <div className="flex gap-2">
+              <Input 
+                value={sportTypeInput} 
+                onChange={(e) => setSportTypeInput(e.target.value)}
+                placeholder="Type sport and click Add..." 
+                className="h-12 bg-white"
+                onKeyDown={(e) => {
+                  if(e.key === 'Enter') { e.preventDefault(); handleAddSportType(e as any); }
+                }}
+              />
+              <Button type="button" onClick={handleAddSportType} className="h-12 px-6">
+                <Plus className="w-4 h-4 mr-2" /> Add
+              </Button>
+            </div>
+            {sportTypes.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {sportTypes.map((sport, i) => (
+                  <Badge key={i} variant="default" className="px-3 py-1.5 text-sm font-medium bg-blue-600">
+                    {sport}
+                    <X className="w-3 h-3 ml-2 cursor-pointer hover:text-red-300" onClick={() => handleRemoveSportType(sport)} />
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {sportTypes.length === 0 && <p className="text-sm text-red-500 italic">Please add at least one sport.</p>}
+          </div>
+
+          <div className="space-y-4 pt-4 border-t border-muted-foreground/20">
             <Label className="font-bold">Sub-Categories / Events (e.g. 100mts, 5K Open, Single Men)</Label>
             <div className="flex gap-2">
               <Input 

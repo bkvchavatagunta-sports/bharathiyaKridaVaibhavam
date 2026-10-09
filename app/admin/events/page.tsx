@@ -57,7 +57,7 @@ export default async function AdminEventsPage() {
                   )}
                   <div className="absolute top-4 left-4">
                     <Badge className="bg-white/95 text-black hover:bg-white border-0 shadow-sm font-bold px-3 py-1">
-                      {event.sportType}
+                      {event.sportType.join(", ")}
                     </Badge>
                   </div>
                   <div className="absolute top-4 right-4">

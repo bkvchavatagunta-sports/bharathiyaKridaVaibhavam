@@ -28,7 +28,7 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
           <div className="p-8 text-white w-full flex justify-between items-end">
             <div>
               <div className="inline-block px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase rounded-full mb-3 shadow-sm">
-                {event.sportType}
+                {event.sportType.join(", ")}
               </div>
               <h1 className="text-4xl md:text-5xl font-extrabold mb-2">{event.title}</h1>
               {event.dedicationName && (
@@ -69,7 +69,7 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
                  <div className="flex flex-wrap gap-2">
                    {event.subCategories && event.subCategories.length > 0 ? (
                      event.subCategories.map((c: string) => <span key={c} className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{c}</span>)
-                   ) : <span className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{event.sportType} Default</span>}
+                   ) : <span className="bg-white px-2 py-1 rounded shadow-sm text-sm font-bold">{event.sportType.join(", ")} Default</span>}
                  </div>
               </div>
             </div>

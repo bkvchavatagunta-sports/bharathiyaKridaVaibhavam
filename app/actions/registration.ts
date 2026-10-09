@@ -84,3 +84,10 @@ export async function verifyPayment(registrationId: string) {
   });
   revalidatePath("/admin/registrations");
 }
+
+export async function deleteRegistration(id: string) {
+  await prisma.registration.delete({
+    where: { id }
+  });
+  revalidatePath("/admin/registrations");
+}

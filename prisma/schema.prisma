@@ -42,7 +42,7 @@ model Event {
   title           String
   slug            String         @unique
   dedicationName  String?        // e.g. "Late Sri XYZ Memorial Cup"
-  sportType       String         // Marathon, Athletics, Hockey, etc.
+  sportType       String[]       @default([])
   subCategories   String[]       @default([])
   ageGroups       String[]       @default([])
   description     String
@@ -87,6 +87,8 @@ model Registration {
   event            Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   userId           String
   user             User          @relation(fields: [userId], references: [id])
+  sportType        String        @default("General")
+
   sportSubCategory String        // e.g., "100m Sprint" or "5K Open"
   age              Int
   gender           String

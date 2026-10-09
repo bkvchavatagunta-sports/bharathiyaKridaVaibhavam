@@ -8,7 +8,6 @@ export async function createEvent(formData: FormData) {
   const title = formData.get("title") as string;
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Math.floor(Math.random() * 1000);
   const dedicationName = formData.get("dedicationName") as string;
-  const sportType = formData.get("sportType") as string;
   const description = formData.get("description") as string;
   const bannerImage = formData.get("bannerImage") as string;
   const venue = formData.get("venue") as string;
@@ -18,9 +17,11 @@ export async function createEvent(formData: FormData) {
   
   let subCategories: string[] = [];
   let ageGroups: string[] = [];
+  let sportTypes: string[] = [];
   try {
     subCategories = JSON.parse(formData.get("subCategories") as string || "[]");
     ageGroups = JSON.parse(formData.get("ageGroups") as string || "[]");
+    sportTypes = JSON.parse(formData.get("sportTypes") as string || "[]");
   } catch(e) {}
   
   await prisma.event.create({
@@ -28,7 +29,7 @@ export async function createEvent(formData: FormData) {
       title,
       slug,
       dedicationName,
-      sportType,
+      sportType: sportTypes,
       subCategories,
       ageGroups,
       description,
@@ -44,7 +45,7 @@ export async function createEvent(formData: FormData) {
   revalidatePath("/admin/events");
   revalidatePath("/events");
   revalidatePath("/");
-  redirect("/admin/events");
+  return { success: true };
 }
 
 export async function deleteEvent(id: string) {
@@ -69,7 +70,6 @@ export async function updateEvent(formData: FormData) {
   const id = formData.get("id") as string;
   const title = formData.get("title") as string;
   const dedicationName = formData.get("dedicationName") as string;
-  const sportType = formData.get("sportType") as string;
   const description = formData.get("description") as string;
   const venue = formData.get("venue") as string;
   const startDate = new Date(formData.get("startDate") as string);
@@ -78,11 +78,14 @@ export async function updateEvent(formData: FormData) {
   
   let subCategories: string[] = [];
   let ageGroups: string[] = [];
+  let sportTypes: string[] = [];
   try {
     const rawSub = formData.get("subCategories");
     const rawAge = formData.get("ageGroups");
+    const rawSport = formData.get("sportTypes");
     if (rawSub) subCategories = JSON.parse(rawSub as string);
     if (rawAge) ageGroups = JSON.parse(rawAge as string);
+    if (rawSport) sportTypes = JSON.parse(rawSport as string);
   } catch(e) {}
 
   await prisma.event.update({
@@ -90,7 +93,7 @@ export async function updateEvent(formData: FormData) {
     data: {
       title,
       dedicationName,
-      sportType,
+      ...(sportTypes.length > 0 && { sportType: sportTypes }),
       ...(subCategories.length > 0 && { subCategories }),
       ...(ageGroups.length > 0 && { ageGroups }),
       description,
@@ -104,5 +107,5 @@ export async function updateEvent(formData: FormData) {
   revalidatePath("/admin/events");
   revalidatePath("/events");
   revalidatePath("/");
-  redirect("/admin/events");
+  return { success: true };
 }
