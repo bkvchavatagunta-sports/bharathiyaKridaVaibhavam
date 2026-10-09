@@ -72,7 +72,7 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
           >
             <div 
                 className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-700"
-                style={{ backgroundImage: `url(https://picsum.photos/seed/sportscollage/800/600)` }}
+                style={{ backgroundImage: `url(/hero-bg.jpg)` }}
             />
             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
 
@@ -94,9 +94,11 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
   if (view === "CATEGORIES") {
     return (
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
           <Button variant="outline" onClick={() => setView("MENU")}>
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Menu
+            <ArrowLeft className="w-4 h-4 mr-1 md:mr-2" /> 
+            <span className="hidden md:inline">Back to Menu</span>
+            <span className="md:hidden">Back</span>
           </Button>
           <h2 className="text-2xl font-bold">Albums by Category</h2>
         </div>
@@ -113,7 +115,7 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
             >
               <div 
                 className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:scale-110 transition-transform duration-700"
-                style={{ backgroundImage: `url(https://picsum.photos/seed/${cat.name}Sports/400/300)` }}
+                style={{ backgroundImage: `url(/grassroots-bg.jpg)` }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
@@ -140,9 +142,11 @@ export function GalleryBrowser({ images }: { images: GalleryImage[] }) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-4 items-center justify-between">
         <Button variant="outline" onClick={() => view === "ALL" ? setView("MENU") : setView("CATEGORIES")}>
-          <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          <ArrowLeft className="w-4 h-4 mr-1 md:mr-2" /> 
+          <span className="hidden md:inline">Back</span>
+          <span className="md:hidden">Back</span>
         </Button>
         <h2 className="text-2xl font-bold">
           {view === "ALL" ? "All Photos" : `${selectedCategory} Album`}

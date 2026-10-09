@@ -32,10 +32,10 @@ export default async function Home() {
   const imageUrls = dbImages.map(img => img.imageUrl);
 
   return (
-    <div className="flex flex-col gap-24 pb-24">
+    <div className="flex flex-col gap-16 pb-24">
       {/* Hero Section */}
       <section className="relative pt-32 pb-40 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/sports/1920/1080')] bg-cover bg-center" />
+        <div className="absolute inset-0 bg-[url('/hero-bg.jpg')] bg-cover bg-center" />
         <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" />
         
         <div className="container relative z-10 mx-auto px-4 text-center space-y-8 max-w-4xl">
@@ -51,12 +51,12 @@ export default async function Home() {
           </p>
           <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
             <Link href="/events">
-              <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6 h-auto bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-6 h-auto bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-[pulse_3s_ease-in-out_infinite]">
                 Explore Upcoming Events
               </Button>
             </Link>
             <Link href="/find-registration">
-              <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8 py-6 h-auto">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg px-8 py-6 h-auto hover:scale-105 transition-transform duration-300 shadow-xl">
                 Download Your Pass
               </Button>
             </Link>
@@ -92,7 +92,7 @@ export default async function Home() {
           </div>
           <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
             <Image 
-              src="https://picsum.photos/seed/team/800/600" 
+              src="/grassroots-bg.jpg" 
               alt="BHARATIYA KRIDA VAIBHAVAM Team" 
               fill 
               className="object-cover" 
