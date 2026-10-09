@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UploadCloud, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CldUploadWidget } from "next-cloudinary";
+import { addGalleryImage } from "@/app/actions/gallery";
 
 export function GalleryUploader() {
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
@@ -21,9 +22,10 @@ export function GalleryUploader() {
         signatureEndpoint="/api/sign-image"
         onSuccess={async (result: any) => {
           const url = result?.info?.secure_url;
-          setUploadedPhotos([...uploadedPhotos, url]);
-          
-          // In a real app we would call a server action here to save to the DB GalleryImage table.
+          if (url) {
+            setUploadedPhotos((prev) => [...prev, url]);
+            await addGalleryImage(url);
+          }
         }}
       >
         {({ open }) => {
@@ -39,7 +41,7 @@ export function GalleryUploader() {
         <div className="w-full space-y-2 pt-4 border-t">
           <p className="font-semibold text-sm flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            {uploadedPhotos.length} Photo(s) Uploaded
+            {uploadedPhotos.length} Photo(s) Saved to Gallery
           </p>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {uploadedPhotos.map((url, i) => (
