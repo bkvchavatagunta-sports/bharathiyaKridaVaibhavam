@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     siteName: "Bharatiya Krida Vaibhavam",
   },
   manifest: "/manifest.json",
+  verification: {
+    google: "dneGurYR-8a7Io19NbTRiIcf8swZhebRTJPXs2O-VhU",
+  },
 };
 
 export default function RootLayout({
