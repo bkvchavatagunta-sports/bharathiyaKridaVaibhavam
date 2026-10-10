@@ -236,23 +236,23 @@ export default async function Home() {
         </div>
         
         {topSponsors.length > 0 ? (
-          <div className="flex flex-col gap-5 max-w-4xl mx-auto w-full px-4">
+          <div className="flex flex-wrap justify-center gap-8 max-w-6xl mx-auto px-4">
             {topSponsors.map(sponsor => (
               <div 
                 key={sponsor.id} 
-                className="group flex flex-col sm:flex-row items-center justify-between w-full p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-white to-slate-50 border border-slate-200 shadow-lg hover:shadow-xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 gap-4 relative overflow-hidden"
+                className="group relative flex flex-col items-center justify-center p-8 rounded-2xl bg-gradient-to-b from-white to-slate-50 border border-slate-200 shadow-xl hover:shadow-2xl hover:-translate-y-2 hover:border-primary/40 transition-all duration-300 w-full sm:w-[260px]"
               >
                 {/* Subtle shine effect on hover */}
-                <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/60 to-transparent transition-transform duration-1000 z-0" />
+                <div className="absolute inset-0 translate-y-[-100%] group-hover:translate-y-[100%] bg-gradient-to-b from-transparent via-white/80 to-transparent transition-transform duration-1000 z-0" />
                 
-                <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-8 w-full text-center sm:text-left relative z-10">
-                  <h3 className="text-2xl font-black text-slate-800 sm:w-[250px] shrink-0">{sponsor.name}</h3>
-                  <p className="text-muted-foreground font-semibold text-lg">{sponsor.designation}</p>
-                </div>
-                <div className="shrink-0 relative z-10 mt-2 sm:mt-0">
-                  <span className="inline-flex items-center justify-center px-6 py-2 rounded-xl bg-gradient-to-r from-primary to-blue-600 text-white font-bold text-xl shadow-md group-hover:shadow-lg transition-all">
-                    ₹{sponsor.amount.toLocaleString()}
-                  </span>
+                <div className="relative z-10 flex flex-col items-center gap-2 w-full">
+                  <h3 className="text-2xl font-black text-slate-800 text-center break-words w-full">{sponsor.name}</h3>
+                  <p className="text-muted-foreground font-semibold text-center text-[15px] leading-snug">{sponsor.designation}</p>
+                  <div className="mt-4">
+                    <span className="inline-flex items-center justify-center px-6 py-2 rounded-full bg-gradient-to-r from-primary to-blue-600 text-white font-bold text-xl shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300">
+                      ₹{sponsor.amount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
