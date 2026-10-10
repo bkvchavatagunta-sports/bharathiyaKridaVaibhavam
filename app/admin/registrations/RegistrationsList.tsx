@@ -8,16 +8,20 @@ import { ChevronDown, ChevronRight, Trash2, Eye } from "lucide-react";
 import { updatePaymentStatus, deleteRegistration } from "@/app/actions/registration";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-function DeleteButton({ id, onDelete }: { id: string, onDelete: (id: string) => void }) {
+function DeleteButton({ id, onDelete }: { id: string, onDelete: (id: string) => Promise<void> }) {
   const [confirm, setConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   return (
     <Button 
       variant={confirm ? "destructive" : "outline"} 
       size="sm" 
-      onClick={() => {
+      disabled={isDeleting}
+      onClick={async () => {
         if (confirm) {
-          onDelete(id);
+          setIsDeleting(true);
+          await onDelete(id);
+          setIsDeleting(false);
         } else {
           setConfirm(true);
           setTimeout(() => setConfirm(false), 3000);
@@ -25,7 +29,7 @@ function DeleteButton({ id, onDelete }: { id: string, onDelete: (id: string) => 
       }}
       className={`transition-all duration-300 ${confirm ? 'w-32' : 'w-10'}`}
     >
-      {confirm ? "Confirm Delete" : <Trash2 className="w-4 h-4 text-red-500" />}
+      {isDeleting ? "..." : confirm ? "Confirm Delete" : <Trash2 className="w-4 h-4 text-red-500" />}
     </Button>
   );
 }
@@ -44,13 +48,16 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
   }, {} as Record<string, Record<string, any[]>>);
 
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const toggleGroup = (key: string) => {
     setExpandedGroups(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleStatusChange = async (id: string, status: "PENDING" | "VERIFIED" | "REJECTED") => {
+    setUpdatingId(id);
     await updatePaymentStatus(id, status);
+    setUpdatingId(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -141,7 +148,10 @@ export function RegistrationsList({ registrations }: { registrations: any[] }) {
                               <Badge className="bg-gray-500">FREE</Badge>
                             ) : (
                               <select 
+                                disabled={updatingId === reg.id}
                                 className={`text-xs font-bold rounded-md px-2 py-1 border-0 focus:ring-2 ${
+                                  updatingId === reg.id ? "opacity-50 cursor-not-allowed" : ""
+                                } ${
                                   reg.paymentStatus === "VERIFIED" ? "bg-green-100 text-green-800" :
                                   reg.paymentStatus === "REJECTED" ? "bg-red-100 text-red-800" :
                                   "bg-yellow-100 text-yellow-800"
