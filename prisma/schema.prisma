@@ -157,3 +157,13 @@ model HeroImage {
   imageUrl   String
   uploadedAt DateTime @default(now())
 }
+
+model SiteSettings {
+  id        String @id @default("global")
+  phone     String @default("+91 75696 04988")
+  email     String @default("bkv.chavatagunta@gmail.com")
+  latitude  String @default("13.43995")
+  longitude String @default("79.31484")
+  address   String @default("Chavatagunta, Vedurukuppam, Tirupati")
+  updatedAt DateTime @updatedAt
+}
