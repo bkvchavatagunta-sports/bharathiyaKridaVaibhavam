@@ -1,6 +1,8 @@
 import prisma from "@/lib/db";
 import Link from "next/link";
 
+import Image from "next/image";
+
 export async function Footer() {
   const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } }) || {
     phone: "+91 75696 04988",
@@ -15,7 +17,7 @@ export async function Footer() {
   return (
     <footer className="print:hidden border-t bg-muted/50">
       <div className="container mx-auto px-4 py-8 md:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           <div className="space-y-3">
             <h3 className="font-semibold">BHARATIYA KRIDA VAIBHAVAM</h3>
             <p className="text-sm text-muted-foreground">
@@ -56,6 +58,36 @@ export async function Footer() {
                 </a>
               </li>
             </ul>
+          </div>
+          <div className="space-y-3">
+            <h3 className="font-semibold">Scan to Visit</h3>
+            <div className="flex flex-col items-start gap-2">
+              <a
+                href="https://bharathiyakridavaibhavam.onrender.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-2 bg-white rounded-xl shadow-sm border border-slate-200 hover:border-primary/50 transition-all inline-block"
+                title="Scan or click to visit Bharatiya Krida Vaibhavam"
+              >
+                <Image
+                  src="/bkv-website-qr.png"
+                  alt="QR Code for https://bharathiyakridavaibhavam.onrender.com/"
+                  width={112}
+                  height={112}
+                  className="rounded-lg group-hover:scale-[1.02] transition-transform"
+                />
+              </a>
+              <p className="text-xs text-muted-foreground">
+                Scan with any mobile camera to open website.
+              </p>
+              <a
+                href="/bkv-website-qr.png"
+                download="bkv-website-qr.png"
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                Download QR Code ↓
+              </a>
+            </div>
           </div>
         </div>
         <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
