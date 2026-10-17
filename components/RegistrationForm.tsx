@@ -38,13 +38,19 @@ export function RegistrationForm({ event }: { event: any }) {
 
   // Team Registration State
   const isTeamSport = ["Football", "Hockey", "Kabaddi", "Volleyball"].includes(selectedSport);
-  const minPlayers = selectedSport === "Kabaddi" ? 7 : selectedSport === "Volleyball" ? 6 : 11;
-  const maxPlayers = selectedSport === "Kabaddi" ? 12 : selectedSport === "Volleyball" ? 12 : 15;
+  const minPlayers = selectedSport === "Kabaddi" ? 7 : selectedSport === "Volleyball" ? 6 : 5;
+  const maxPlayers = selectedSport === "Kabaddi" ? 12 : selectedSport === "Volleyball" ? 12 : 18;
   const [playerNames, setPlayerNames] = useState<string[]>(Array(minPlayers).fill(""));
   const [teamName, setTeamName] = useState("");
   const [coachName, setCoachName] = useState("");
   const [captainName, setCaptainName] = useState("");
   const [viceCaptainName, setViceCaptainName] = useState("");
+
+  useEffect(() => {
+    if (playerNames.length < minPlayers) {
+      setPlayerNames(prev => [...prev, ...Array(minPlayers - prev.length).fill("")]);
+    }
+  }, [minPlayers]);
 
   const maxDob = new Date();
   maxDob.setFullYear(maxDob.getFullYear() - 5);
@@ -146,7 +152,7 @@ export function RegistrationForm({ event }: { event: any }) {
               <h4 className="font-black text-lg mb-4 text-primary pb-2 border-b">Team: {teamName}</h4>
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <p><strong>Captain:</strong> {captainName}</p>
-                <p><strong>Vice Capt:</strong> {viceCaptainName}</p>
+                {viceCaptainName ? <p><strong>Vice Capt:</strong> {viceCaptainName}</p> : <p className="text-muted-foreground"><strong>Vice Capt:</strong> <i>None</i></p>}
                 {coachName && <p className="col-span-2"><strong>Coach:</strong> {coachName}</p>}
               </div>
               <div>
@@ -211,7 +217,7 @@ export function RegistrationForm({ event }: { event: any }) {
                     <div className="space-y-2"><Label className="font-bold">Team Name *</Label><Input required minLength={2} value={teamName} onChange={e=>setTeamName(e.target.value)} className="h-12 bg-white" /></div>
                     <div className="space-y-2"><Label className="font-bold">Coach Name (Optional)</Label><Input value={coachName} onChange={e=>setCoachName(e.target.value)} className="h-12 bg-white" /></div>
                     <div className="space-y-2"><Label className="font-bold">Captain Name *</Label><Input required minLength={2} value={captainName} onChange={e=>setCaptainName(e.target.value)} className="h-12 bg-white" /></div>
-                    <div className="space-y-2"><Label className="font-bold">Vice Captain Name *</Label><Input required minLength={2} value={viceCaptainName} onChange={e=>setViceCaptainName(e.target.value)} className="h-12 bg-white" /></div>
+                    <div className="space-y-2"><Label className="font-bold">Vice Captain Name (Optional)</Label><Input value={viceCaptainName} onChange={e=>setViceCaptainName(e.target.value)} placeholder="Optional" className="h-12 bg-white" /></div>
                   </div>
                 </div>
 
@@ -223,7 +229,13 @@ export function RegistrationForm({ event }: { event: any }) {
                   <div className="grid md:grid-cols-2 gap-3">
                     {playerNames.map((pn, i) => (
                       <div key={i} className="flex gap-2 items-center">
-                        <Input required minLength={2} placeholder={`Player ${i + 1}`} value={pn} onChange={(e) => handlePlayerChange(i, e.target.value)} />
+                        <Input 
+                          required={i < minPlayers} 
+                          minLength={i < minPlayers ? 2 : undefined} 
+                          placeholder={`Player ${i + 1}${i < minPlayers ? " *" : " (Optional)"}`} 
+                          value={pn} 
+                          onChange={(e) => handlePlayerChange(i, e.target.value)} 
+                        />
                         {playerNames.length > minPlayers && <Button type="button" variant="ghost" size="icon" onClick={() => handleRemovePlayer(i)} className="text-red-500"><Trash2 className="w-4 h-4" /></Button>}
                       </div>
                     ))}

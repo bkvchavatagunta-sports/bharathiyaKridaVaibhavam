@@ -97,7 +97,9 @@ export default async function PassPage({ params }: { params: Promise<{ id: strin
               <p className="text-gray-500 font-bold uppercase text-xs mb-2 border-b pb-2">Team Roster: {reg.teamName}</p>
               <div className="grid grid-cols-2 gap-4 text-sm mt-3">
                 <div><span className="font-bold text-gray-500">Captain:</span> <span className="font-black text-gray-900">{reg.captainName}</span></div>
-                <div><span className="font-bold text-gray-500">Vice Capt:</span> <span className="font-black text-gray-900">{reg.viceCaptainName}</span></div>
+                {reg.viceCaptainName ? (
+                  <div><span className="font-bold text-gray-500">Vice Capt:</span> <span className="font-black text-gray-900">{reg.viceCaptainName}</span></div>
+                ) : null}
                 {reg.coachName && <div className="col-span-2"><span className="font-bold text-gray-500">Coach:</span> <span className="font-black text-gray-900">{reg.coachName}</span></div>}
               </div>
               <div className="mt-4 bg-gray-50 p-4 rounded-lg border">
