@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { CldUploadWidget } from "next-cloudinary";
 import { submitRegistration } from "@/app/actions/registration";
 
-export function RegistrationForm({ event }: { event: any }) {
+export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upiId?: string }) {
   const router = useRouter();
   const [step, setStep] = useState<"FORM" | "PREVIEW">("FORM");
   const [loading, setLoading] = useState(false);
@@ -287,10 +287,25 @@ export function RegistrationForm({ event }: { event: any }) {
               </div>
               {paymentMode === 'UPI' && (
                 <div className="bg-muted/20 p-6 rounded-xl border-dashed border-2 text-center space-y-4 mt-4">
-                  <p className="font-mono font-black text-xl text-primary">UPI ID: bkv@ybl</p>
-                  <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => setProofUrl(res?.info?.secure_url)}>
-                    {({ open }) => <Button type="button" variant={proofUrl ? "default" : "outline"} onClick={() => open()}>{proofUrl ? 'Screenshot Uploaded!' : 'Upload Screenshot'}</Button>}
-                  </CldUploadWidget>
+                  <div className="inline-flex items-center gap-3 bg-white px-4 py-2 rounded-lg border shadow-sm">
+                    <p className="font-mono font-black text-xl text-primary">UPI ID: {upiId}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(upiId);
+                        alert(`UPI ID "${upiId}" copied to clipboard!`);
+                      }}
+                      className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded font-bold hover:bg-primary/20 transition-colors"
+                      title="Copy UPI ID"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <div>
+                    <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => setProofUrl(res?.info?.secure_url)}>
+                      {({ open }) => <Button type="button" variant={proofUrl ? "default" : "outline"} onClick={() => open()}>{proofUrl ? 'Screenshot Uploaded!' : 'Upload Payment Screenshot'}</Button>}
+                    </CldUploadWidget>
+                  </div>
                 </div>
               )}
             </div>

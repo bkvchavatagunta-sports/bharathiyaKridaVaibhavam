@@ -17,6 +17,7 @@ export async function getSettings() {
         latitude: "13.43995",
         longitude: "79.31484",
         address: "Chavatagunta, Vedurukuppam, Tirupati",
+        upiId: "bkv@ybl",
       }
     });
   }
@@ -30,10 +31,11 @@ export async function updateSettings(formData: FormData) {
   const latitude = formData.get("latitude") as string;
   const longitude = formData.get("longitude") as string;
   const address = formData.get("address") as string;
+  const upiId = (formData.get("upiId") as string)?.trim() || "bkv@ybl";
 
   await prisma.siteSettings.upsert({
     where: { id: "global" },
-    update: { phone, email, latitude, longitude, address },
+    update: { phone, email, latitude, longitude, address, upiId },
     create: {
       id: "global",
       phone,
@@ -41,9 +43,11 @@ export async function updateSettings(formData: FormData) {
       latitude,
       longitude,
       address,
+      upiId,
     }
   });
 
   revalidatePath("/", "layout");
+  revalidatePath("/events", "layout");
   return { success: true };
 }

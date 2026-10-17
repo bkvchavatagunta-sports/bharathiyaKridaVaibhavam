@@ -165,5 +165,6 @@ model SiteSettings {
   latitude  String @default("13.43995")
   longitude String @default("79.31484")
   address   String @default("Chavatagunta, Vedurukuppam, Tirupati")
+  upiId     String @default("bkv@ybl")
   updatedAt DateTime @updatedAt
 }

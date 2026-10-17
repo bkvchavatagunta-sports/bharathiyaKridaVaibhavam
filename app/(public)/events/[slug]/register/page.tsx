@@ -19,9 +19,12 @@ export default async function RegisterPage({ params }: { params: Promise<{ slug:
     );
   }
 
+  const settings = await prisma.siteSettings.findUnique({ where: { id: "global" } });
+  const upiId = settings?.upiId || "bkv@ybl";
+
   return (
     <div className="min-h-screen bg-muted/30 p-4 md:p-8">
-      <RegistrationForm event={event} />
+      <RegistrationForm event={event} upiId={upiId} />
     </div>
   );
 }

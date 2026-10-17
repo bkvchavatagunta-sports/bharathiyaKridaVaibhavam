@@ -58,6 +58,24 @@ export function SettingsForm({ settings }: { settings: any }) {
               <Label htmlFor="longitude" className="font-bold">Longitude (For Google Maps)</Label>
               <Input id="longitude" name="longitude" defaultValue={settings.longitude} required className="h-12" placeholder="79.31484" />
             </div>
+
+            <div className="space-y-2 md:col-span-2 bg-muted/20 p-4 rounded-xl border">
+              <Label htmlFor="upiId" className="font-bold flex items-center justify-between">
+                <span>UPI ID (Registration Form Payment)</span>
+                <span className="text-xs text-primary font-semibold">Active for Online Payments</span>
+              </Label>
+              <Input 
+                id="upiId" 
+                name="upiId" 
+                defaultValue={settings.upiId || "bkv@ybl"} 
+                required 
+                className="h-12 font-mono font-bold bg-white" 
+                placeholder="e.g. bkv@ybl or username@oksbi" 
+              />
+              <p className="text-xs text-muted-foreground">
+                This UPI ID is displayed dynamically to participants when paying entry fees via UPI in the event registration form.
+              </p>
+            </div>
           </div>
 
           <div className="pt-6 border-t flex items-center justify-between">
