@@ -16,7 +16,7 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
   const [loading, setLoading] = useState(false);
   
   // Base State
-  const [paymentMode, setPaymentMode] = useState<"VENUE" | "UPI">("VENUE");
+  const [paymentMode, setPaymentMode] = useState<"VENUE" | "UPI">("UPI");
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [dob, setDob] = useState("");
   const [age, setAge] = useState<number | null>(null);
@@ -278,11 +278,31 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
             <div className="space-y-4 pt-6 border-t">
               <h3 className="font-bold text-xl text-primary">Payment Details (Fee: ₹{event.entryFee})</h3>
               <div className="grid md:grid-cols-2 gap-4">
-                <div className={`border-2 rounded-xl p-5 cursor-pointer ${paymentMode === 'VENUE' ? 'border-primary bg-primary/5 shadow-md' : 'border-muted'}`} onClick={() => setPaymentMode('VENUE')}>
-                  <p className="font-bold text-lg">Pay at Venue</p><p className="text-sm text-muted-foreground">Pay cash directly at the ground.</p>
+                <div 
+                  className="border-2 rounded-xl p-5 opacity-50 bg-muted/20 border-muted/80 cursor-not-allowed relative select-none"
+                  title="Pay at Venue is currently disabled"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-bold text-lg text-muted-foreground line-through">Pay at Venue</p>
+                    <span className="text-[11px] font-bold bg-muted text-muted-foreground px-2 py-0.5 rounded-full border">Disabled</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Cash at venue is disabled. Please pay via UPI.</p>
                 </div>
-                <div className={`border-2 rounded-xl p-5 cursor-pointer ${paymentMode === 'UPI' ? 'border-primary bg-primary/5 shadow-md' : 'border-muted'}`} onClick={() => setPaymentMode('UPI')}>
-                  <p className="font-bold text-lg">Pay Now (UPI)</p><p className="text-sm text-muted-foreground">Pay via UPI and upload proof.</p>
+                <div 
+                  className={`border-2 rounded-xl p-5 cursor-pointer relative transition-all duration-300 ease-out transform hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/15 hover:border-primary active:scale-[0.99] ${
+                    paymentMode === 'UPI' ? 'border-primary bg-primary/5 shadow-md ring-2 ring-primary/20' : 'border-muted hover:bg-muted/10'
+                  }`} 
+                  onClick={() => setPaymentMode('UPI')}
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="font-bold text-lg text-primary flex items-center gap-2">
+                      Pay Now (UPI)
+                    </p>
+                    <span className="text-[11px] font-bold bg-primary/10 text-primary px-2.5 py-0.5 rounded-full border border-primary/20 animate-pulse">
+                      Recommended
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">Instant verification via UPI payment screenshot.</p>
                 </div>
               </div>
               {paymentMode === 'UPI' && (
