@@ -224,18 +224,25 @@ export default function NewEventPage() {
           <Textarea id="rules" name="rules" placeholder="Enter specific rules, formatting guidelines, etc..." className="min-h-[120px]" />
         </div>
 
-        <div className="space-y-2">
-          <Label className="font-bold">Event Banner Image *</Label>
+        <div className="space-y-4">
+          <div>
+            <Label className="font-bold text-base">Event Banner & Link Thumbnail (OG Preview) *</Label>
+            <p className="text-sm text-muted-foreground">
+              This image is used as the event banner and also appears as the link thumbnail preview when sharing the event link on WhatsApp, Facebook, Twitter, and other apps.
+            </p>
+          </div>
           <div className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center bg-muted/20">
             {bannerUrl ? (
               <div className="w-full space-y-4">
-                <img src={bannerUrl} alt="Banner Preview" className="w-full h-48 object-cover rounded-md shadow-sm" />
-                <p className="text-sm font-bold text-green-600 flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> Banner Uploaded Successfully
-                </p>
-                <div className="flex justify-center">
+                <div className="relative w-full h-56 rounded-lg overflow-hidden shadow-md bg-slate-900">
+                  <img src={bannerUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <p className="text-sm font-bold text-green-600 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" /> Thumbnail Uploaded Successfully
+                  </p>
                   <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => setBannerUrl(res?.info?.secure_url)}>
-                    {({ open }) => <Button type="button" variant="outline" size="sm" onClick={() => open()}>Replace Banner</Button>}
+                    {({ open }) => <Button type="button" variant="outline" size="sm" onClick={() => open()} className="font-bold"><UploadCloud className="w-4 h-4 mr-2" /> Change / Replace Thumbnail</Button>}
                   </CldUploadWidget>
                 </div>
               </div>
@@ -245,14 +252,35 @@ export default function NewEventPage() {
                 <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => setBannerUrl(res?.info?.secure_url)}>
                   {({ open }) => (
                     <Button type="button" onClick={() => open()} variant="secondary" className="font-bold">
-                      Upload Banner Image
+                      Upload Thumbnail Image
                     </Button>
                   )}
                 </CldUploadWidget>
-                <p className="text-sm text-muted-foreground mt-2">Recommended size: 1920x1080 (Landscape)</p>
+                <p className="text-sm text-muted-foreground mt-2">Recommended size: 1200x630 or 1920x1080 (Landscape)</p>
               </>
             )}
           </div>
+
+          {/* Real-time Link Preview Display */}
+          {bannerUrl && (
+            <div className="mt-4 p-4 rounded-xl border bg-slate-50 space-y-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <span>📱 Live Link Share Preview (WhatsApp / Social Media)</span>
+              </p>
+              <div className="max-w-md bg-white rounded-lg border shadow-sm overflow-hidden text-left">
+                <div className="relative w-full h-44 bg-slate-100">
+                  <img src={bannerUrl} alt="Link Preview" className="w-full h-full object-cover" />
+                </div>
+                <div className="p-3 space-y-1">
+                  <p className="text-[11px] text-muted-foreground uppercase font-semibold">bharathiyakridavaibhavam.onrender.com</p>
+                  <p className="text-sm font-bold text-slate-900 line-clamp-1">Event Title</p>
+                  <p className="text-xs text-slate-500 line-clamp-2">
+                    Empowering rural athletes and managing sports events in Andhra Pradesh.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="pt-8 border-t">

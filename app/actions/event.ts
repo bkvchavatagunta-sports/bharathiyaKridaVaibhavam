@@ -74,6 +74,7 @@ export async function updateEvent(formData: FormData) {
   const dedicationName = formData.get("dedicationName") as string;
   const description = formData.get("description") as string;
   const rules = formData.get("rules") as string;
+  const bannerImage = formData.get("bannerImage") as string;
   const venue = formData.get("venue") as string;
   const startDate = new Date(formData.get("startDate") as string);
   const endDate = new Date(formData.get("endDate") as string);
@@ -101,6 +102,7 @@ export async function updateEvent(formData: FormData) {
       ...(ageGroups.length > 0 && { ageGroups }),
       description,
       rules,
+      ...(bannerImage && { bannerImage }),
       venue,
       startDate,
       endDate,
@@ -110,6 +112,7 @@ export async function updateEvent(formData: FormData) {
 
   revalidatePath("/admin/events");
   revalidatePath("/events");
+  revalidatePath("/events", "layout");
   revalidatePath("/");
   return { success: true };
 }

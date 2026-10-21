@@ -5,6 +5,58 @@ import Image from "next/image";
 import prisma from "@/lib/db";
 import { notFound } from "next/navigation";
 import { format } from "date-fns";
+import type { Metadata } from "next";
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const resolvedParams = await params;
+  const event = await prisma.event.findUnique({ where: { slug: resolvedParams.slug } });
+
+  if (!event) {
+    return {
+      title: "Event Not Found | Bharatiya Krida Vaibhavam",
+    };
+  }
+
+  const title = event.dedicationName 
+    ? `${event.title} (${event.dedicationName}) | BKV Sports`
+    : `${event.title} | Bharatiya Krida Vaibhavam`;
+  const description = event.description.length > 160 
+    ? `${event.description.substring(0, 157)}...` 
+    : event.description;
+  const siteUrl = "https://bharathiyakridavaibhavam.onrender.com";
+  const eventUrl = `${siteUrl}/events/${event.slug}`;
+  const imageUrl = event.bannerImage;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      url: eventUrl,
+      siteName: "Bharatiya Krida Vaibhavam",
+      images: imageUrl
+        ? [
+            {
+              url: imageUrl,
+              width: 1200,
+              height: 630,
+              alt: event.title,
+            },
+          ]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+  };
+}
 
 export default async function EventDetails({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
