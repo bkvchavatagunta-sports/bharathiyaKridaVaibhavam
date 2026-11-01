@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Calendar, Users, Trophy, IndianRupee, Settings } from "lucide-react";
+import { LayoutDashboard, Calendar, Users, Trophy, IndianRupee, Settings, BarChart3 } from "lucide-react";
 import { SignOutButton } from "@/components/SignOutButton";
 
 export function AdminSidebar() {
@@ -56,6 +56,12 @@ export function AdminSidebar() {
           className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${isActive('/admin/sponsors') ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-muted/50'}`}
         >
           <IndianRupee className="w-5 h-5" /> Patrons
+        </Link>
+        <Link 
+          href="/admin/reports" 
+          className={`flex items-center gap-3 px-3 py-2 rounded-md font-medium transition-colors ${isActive('/admin/reports') ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground hover:bg-muted/50'}`}
+        >
+          <BarChart3 className="w-5 h-5" /> Reports
         </Link>
         <Link 
           href="/admin/settings" 

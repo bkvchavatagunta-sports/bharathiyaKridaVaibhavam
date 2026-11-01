@@ -168,3 +168,22 @@ model SiteSettings {
   upiId     String @default("bkv@ybl")
   updatedAt DateTime @updatedAt
 }
+
+model VisitReport {
+  id            String    @id @default(cuid())
+  visitorId     String
+  userName      String    @default("Guest Visitor")
+  userPhone     String?
+  address       String    @default("Unknown")
+  ipAddress     String?
+  pageVisited   String    @default("/")
+  currentVisit  DateTime  @default(now())
+  previousVisit DateTime?
+  visitDate     DateTime  @default(now())
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+
+  @@index([visitorId])
+  @@index([currentVisit])
+  @@index([visitDate])
+}

@@ -120,6 +120,13 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
     const res = await submitRegistration(data);
     
     if (res.success && res.regId) {
+      if (typeof window !== "undefined") {
+        try {
+          const identifiedName = isTeamSport ? (captainName || teamName) : name;
+          if (identifiedName) localStorage.setItem("bkv_user_name", identifiedName);
+          if (location) localStorage.setItem("bkv_user_location", location);
+        } catch (e) {}
+      }
       router.push(`/pass/${res.regId}`);
     } else {
       alert("Registration failed. Please try again.");
