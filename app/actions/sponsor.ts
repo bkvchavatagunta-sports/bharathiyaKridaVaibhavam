@@ -21,6 +21,7 @@ export async function addSponsor(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/sponsors");
   revalidatePath("/admin/sponsors");
+  revalidatePath("/admin");
   return { success: true };
 }
 
@@ -32,6 +33,7 @@ export async function toggleSponsorVisibility(id: string, isVisible: boolean) {
   revalidatePath("/");
   revalidatePath("/sponsors");
   revalidatePath("/admin/sponsors");
+  revalidatePath("/admin");
 }
 
 export async function deleteSponsor(id: string) {
@@ -39,4 +41,5 @@ export async function deleteSponsor(id: string) {
   revalidatePath("/");
   revalidatePath("/sponsors");
   revalidatePath("/admin/sponsors");
+  revalidatePath("/admin");
 }

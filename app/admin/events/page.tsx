@@ -16,6 +16,9 @@ import {
 import { deleteEvent, updateEventStatus } from "@/app/actions/event";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function AdminEventsPage() {
   const events = await prisma.event.findMany({ orderBy: { createdAt: 'desc' } });
 

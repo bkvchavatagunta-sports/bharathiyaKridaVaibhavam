@@ -45,6 +45,7 @@ export async function createEvent(formData: FormData) {
   });
 
   revalidatePath("/admin/events");
+  revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath("/");
   return { success: true };
@@ -53,6 +54,7 @@ export async function createEvent(formData: FormData) {
 export async function deleteEvent(id: string) {
   await prisma.event.delete({ where: { id } });
   revalidatePath("/admin/events");
+  revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath("/");
   redirect("/admin/events");
@@ -64,6 +66,7 @@ export async function updateEventStatus(id: string, status: "UPCOMING" | "ONGOIN
     data: { status }
   });
   revalidatePath("/admin/events");
+  revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath("/");
 }
@@ -111,6 +114,7 @@ export async function updateEvent(formData: FormData) {
   });
 
   revalidatePath("/admin/events");
+  revalidatePath("/admin");
   revalidatePath("/events");
   revalidatePath("/events", "layout");
   revalidatePath("/");

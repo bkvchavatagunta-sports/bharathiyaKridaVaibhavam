@@ -44,6 +44,11 @@ export async function submitRegistration(data: any) {
     }
   });
 
+  revalidatePath("/admin");
+  revalidatePath("/admin/registrations");
+  revalidatePath("/events");
+  revalidatePath("/");
+
   return { success: true, regId: reg.id };
 }
 
@@ -82,6 +87,7 @@ export async function updatePaymentStatus(registrationId: string, status: "PENDI
     where: { id: registrationId },
     data: { paymentStatus: status }
   });
+  revalidatePath("/admin");
   revalidatePath("/admin/registrations");
 }
 
@@ -89,5 +95,6 @@ export async function deleteRegistration(id: string) {
   await prisma.registration.delete({
     where: { id }
   });
+  revalidatePath("/admin");
   revalidatePath("/admin/registrations");
 }
