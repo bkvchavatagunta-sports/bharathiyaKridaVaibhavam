@@ -2,19 +2,46 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X, UploadCloud, CheckCircle, MapPin, Plus, Trash2, Edit2, CheckCircle2 } from "lucide-react";
+import { 
+  X, 
+  UploadCloud, 
+  CheckCircle, 
+  MapPin, 
+  Plus, 
+  Trash2, 
+  Edit2, 
+  CheckCircle2, 
+  Sparkles, 
+  Info, 
+  AlertCircle 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CldUploadWidget } from "next-cloudinary";
 import { submitRegistration } from "@/app/actions/registration";
+import { RegistrationTour } from "@/components/RegistrationTour";
 
 export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upiId?: string }) {
   const router = useRouter();
   const [step, setStep] = useState<"FORM" | "PREVIEW">("FORM");
   const [loading, setLoading] = useState(false);
   
+  // Guided Tour & Assistant State
+  const [tourOpen, setTourOpen] = useState(false);
+  const [activeError, setActiveError] = useState<string | null>(null);
+
+  // Check URL query for auto-starting tour e.g. /events/[slug]/register?tour=true
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tour") === "true") {
+        setTourOpen(true);
+      }
+    }
+  }, []);
+
   // Base State
   const [paymentMode, setPaymentMode] = useState<"VENUE" | "UPI">("UPI");
   const [proofUrl, setProofUrl] = useState<string | null>(null);
@@ -52,6 +79,16 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
     }
   }, [minPlayers]);
 
+  // Progress Checklist Calculation (Option 3)
+  const isStep1Done = Boolean(selectedSport && category && ageGroup);
+  const filledSquadCount = playerNames.filter(n => n.trim().length >= 2).length;
+  const isStep2Done = isTeamSport 
+    ? Boolean(teamName.trim().length >= 2 && captainName.trim().length >= 2 && filledSquadCount >= minPlayers)
+    : Boolean(name.trim().length >= 2);
+  const isStep3Done = Boolean(phone.trim().length >= 10 && location.trim().length >= 3 && dob && gender);
+  const isStep4Done = event.entryFee === 0 || Boolean(proofUrl);
+  const completedStepsCount = (isStep1Done ? 1 : 0) + (isStep2Done ? 1 : 0) + (isStep3Done ? 1 : 0) + (isStep4Done ? 1 : 0);
+
   const maxDob = new Date();
   maxDob.setFullYear(maxDob.getFullYear() - 5);
   const maxDobStr = maxDob.toISOString().split("T")[0];
@@ -64,11 +101,30 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
     const m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) a--;
     setAge(a);
+    if (activeError) setActiveError(null);
   };
 
   const handleAddPlayer = () => { if (playerNames.length < maxPlayers) setPlayerNames([...playerNames, ""]); };
   const handleRemovePlayer = (index: number) => { if (playerNames.length > minPlayers) setPlayerNames(playerNames.filter((_, i) => i !== index)); };
-  const handlePlayerChange = (index: number, value: string) => { const newP = [...playerNames]; newP[index] = value; setPlayerNames(newP); };
+  const handlePlayerChange = (index: number, value: string) => { 
+    const newP = [...playerNames]; 
+    newP[index] = value; 
+    setPlayerNames(newP);
+    if (activeError) setActiveError(null);
+  };
+
+  const scrollToElement = (id: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-4", "ring-primary", "transition-all");
+        setTimeout(() => {
+          el.classList.remove("ring-4", "ring-primary");
+        }, 2500);
+      }
+    }, 80);
+  };
 
   const getCurrentLocation = () => {
     if (!navigator.geolocation) return alert("Geolocation is not supported by your browser");
@@ -88,8 +144,69 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
 
   const handlePreviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (age !== null && age < 5) return alert("Participant must be at least 5 years old.");
-    if (paymentMode === "UPI" && !proofUrl && event.entryFee > 0) return alert("Please upload UPI payment screenshot.");
+    setActiveError(null);
+
+    // Smart Validation with smooth scroll & visual pulse (Option 3)
+    if (isTeamSport) {
+      if (!teamName.trim()) {
+        setActiveError("Please enter your Team Name to proceed.");
+        scrollToElement("tour-team-details");
+        return;
+      }
+      if (!captainName.trim()) {
+        setActiveError("Please enter the Captain Name.");
+        scrollToElement("tour-team-details");
+        return;
+      }
+      if (filledSquadCount < minPlayers) {
+        setActiveError(`Playing squad requires at least ${minPlayers} player names (currently ${filledSquadCount} filled).`);
+        scrollToElement("tour-team-details");
+        return;
+      }
+    } else {
+      if (!name.trim()) {
+        setActiveError("Please enter Participant Full Name.");
+        scrollToElement("tour-participant-details");
+        return;
+      }
+    }
+
+    if (!phone.trim() || !/^\+?[0-9]{10,15}$/.test(phone)) {
+      setActiveError("Please enter a valid 10-digit mobile number for registration tracking.");
+      scrollToElement("tour-contact-location");
+      return;
+    }
+
+    if (!location.trim()) {
+      setActiveError("Please enter your Village or City location (or tap 📍 to auto-fill).");
+      scrollToElement("tour-contact-location");
+      return;
+    }
+
+    if (!dob) {
+      setActiveError("Please select Date of Birth.");
+      scrollToElement("tour-dob-gender");
+      return;
+    }
+
+    if (age !== null && age < 5) {
+      setActiveError("Participant must be at least 5 years old.");
+      scrollToElement("tour-dob-gender");
+      return;
+    }
+
+    if (!gender) {
+      setActiveError("Please select Gender.");
+      scrollToElement("tour-dob-gender");
+      return;
+    }
+
+    if (paymentMode === "UPI" && !proofUrl && event.entryFee > 0) {
+      setActiveError("Please upload your UPI payment screenshot to complete registration.");
+      scrollToElement("tour-payment");
+      return;
+    }
+
     setStep("PREVIEW");
   };
 
@@ -183,15 +300,67 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
-      <Card className="shadow-xl border-t-8 border-t-primary">
-        <CardHeader className="bg-muted/20 border-b">
-          <CardTitle className="text-3xl font-black text-primary">Register for {event.title}</CardTitle>
-          <CardDescription className="text-base font-medium">Fill out your details to secure your spot.</CardDescription>
+      {/* Interactive Walkthrough Tour (Option 1) */}
+      <RegistrationTour
+        isOpen={tourOpen}
+        onClose={() => setTourOpen(false)}
+        isTeamSport={isTeamSport}
+        minPlayers={minPlayers}
+      />
+
+      <Card className="shadow-xl border-t-8 border-t-primary overflow-hidden">
+        <CardHeader className="bg-muted/20 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <CardTitle className="text-2xl sm:text-3xl font-black text-primary">Register for {event.title}</CardTitle>
+            <CardDescription className="text-sm sm:text-base font-medium">Fill out your details to secure your spot.</CardDescription>
+          </div>
+          {/* Quick Demo Tour Launch Button */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setTourOpen(true)}
+            className="self-start sm:self-auto bg-primary/10 text-primary border-primary/30 hover:bg-primary/20 font-bold flex items-center gap-2 shadow-sm text-xs sm:text-sm h-10 px-4"
+          >
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            <span>How to Register? (Demo Tour)</span>
+          </Button>
         </CardHeader>
+
+        {/* In-Form Smart Assistance & Progress Checklist (Option 3) */}
+        <div className="bg-slate-50 border-b p-4 px-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Info className="w-3.5 h-3.5 text-primary" /> Registration Progress
+            </span>
+            <span className="text-xs font-black text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
+              {completedStepsCount} of 4 Completed
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+            <div className={`p-2.5 rounded-xl border flex items-center gap-2 font-bold transition-all ${isStep1Done ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-xs' : 'bg-white text-muted-foreground'}`}>
+              {isStep1Done ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0 flex items-center justify-center text-[10px]">1</div>}
+              <span className="truncate">Category</span>
+            </div>
+            <div className={`p-2.5 rounded-xl border flex items-center gap-2 font-bold transition-all ${isStep2Done ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-xs' : 'bg-white text-muted-foreground'}`}>
+              {isStep2Done ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0 flex items-center justify-center text-[10px]">2</div>}
+              <span className="truncate">{isTeamSport ? "Squad Roster" : "Athlete Info"}</span>
+            </div>
+            <div className={`p-2.5 rounded-xl border flex items-center gap-2 font-bold transition-all ${isStep3Done ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-xs' : 'bg-white text-muted-foreground'}`}>
+              {isStep3Done ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0 flex items-center justify-center text-[10px]">3</div>}
+              <span className="truncate">Contact & Village</span>
+            </div>
+            <div className={`p-2.5 rounded-xl border flex items-center gap-2 font-bold transition-all ${isStep4Done ? 'bg-emerald-50 text-emerald-800 border-emerald-200 shadow-xs' : 'bg-white text-muted-foreground'}`}>
+              {isStep4Done ? <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> : <div className="w-4 h-4 rounded-full border-2 border-muted-foreground shrink-0 flex items-center justify-center text-[10px]">4</div>}
+              <span className="truncate">UPI Payment</span>
+            </div>
+          </div>
+        </div>
+
         <CardContent className="pt-8">
           <form onSubmit={handlePreviewSubmit} className="space-y-8">
             
-            <div className="grid md:grid-cols-3 gap-6 mb-8 p-6 bg-muted/20 border rounded-xl">
+            {/* Step 1: Sport & Category */}
+            <div id="tour-sport-category" className="grid md:grid-cols-3 gap-6 mb-8 p-6 bg-muted/20 border rounded-xl transition-all">
               <div className="space-y-2">
                 <Label className="font-semibold">Sport *</Label>
                 <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={selectedSport} onChange={e=>setSelectedSport(e.target.value)}>
@@ -216,21 +385,30 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
               </div>
             </div>
             
+            {/* Step 2: Team Roster or Individual Athlete */}
             {isTeamSport ? (
-              <div className="space-y-6">
+              <div id="tour-team-details" className="space-y-6 transition-all">
                 <div className="bg-muted/30 p-4 rounded-xl border border-primary/20 space-y-4">
-                  <h3 className="font-bold text-lg text-primary flex items-center gap-2">Team Details</h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-lg text-primary flex items-center gap-2">Team Details</h3>
+                    <span className="text-xs text-muted-foreground font-semibold">Vice Captain is optional</span>
+                  </div>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label className="font-bold">Team Name *</Label><Input required minLength={2} value={teamName} onChange={e=>setTeamName(e.target.value)} className="h-12 bg-white" /></div>
-                    <div className="space-y-2"><Label className="font-bold">Coach Name (Optional)</Label><Input value={coachName} onChange={e=>setCoachName(e.target.value)} className="h-12 bg-white" /></div>
-                    <div className="space-y-2"><Label className="font-bold">Captain Name *</Label><Input required minLength={2} value={captainName} onChange={e=>setCaptainName(e.target.value)} className="h-12 bg-white" /></div>
+                    <div className="space-y-2"><Label className="font-bold">Team Name *</Label><Input required minLength={2} value={teamName} onChange={e=>{setTeamName(e.target.value); if(activeError) setActiveError(null);}} className="h-12 bg-white" placeholder="e.g. Bullet Youth FC" /></div>
+                    <div className="space-y-2"><Label className="font-bold">Coach Name (Optional)</Label><Input value={coachName} onChange={e=>setCoachName(e.target.value)} className="h-12 bg-white" placeholder="Optional" /></div>
+                    <div className="space-y-2"><Label className="font-bold">Captain Name *</Label><Input required minLength={2} value={captainName} onChange={e=>{setCaptainName(e.target.value); if(activeError) setActiveError(null);}} className="h-12 bg-white" placeholder="Captain Full Name" /></div>
                     <div className="space-y-2"><Label className="font-bold">Vice Captain Name (Optional)</Label><Input value={viceCaptainName} onChange={e=>setViceCaptainName(e.target.value)} placeholder="Optional" className="h-12 bg-white" /></div>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 bg-slate-50/50 p-4 rounded-xl border">
                   <div className="flex justify-between items-center">
-                    <Label className="font-bold">Playing Squad (Min {minPlayers}, Max {maxPlayers}) *</Label>
+                    <div>
+                      <Label className="font-bold">Playing Squad (Min {minPlayers}, Max {maxPlayers}) *</Label>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Enter at least {minPlayers} player names. ({filledSquadCount}/{minPlayers} filled)
+                      </p>
+                    </div>
                     <Button type="button" variant="outline" size="sm" onClick={handleAddPlayer} disabled={playerNames.length >= maxPlayers}><Plus className="w-4 h-4 mr-2" /> Add Player</Button>
                   </div>
                   <div className="grid md:grid-cols-2 gap-3">
@@ -242,6 +420,7 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
                           placeholder={`Player ${i + 1}${i < minPlayers ? " *" : " (Optional)"}`} 
                           value={pn} 
                           onChange={(e) => handlePlayerChange(i, e.target.value)} 
+                          className="bg-white"
                         />
                         {playerNames.length > minPlayers && <Button type="button" variant="ghost" size="icon" onClick={() => handleRemovePlayer(i)} className="text-red-500"><Trash2 className="w-4 h-4" /></Button>}
                       </div>
@@ -250,40 +429,50 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
                 </div>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2"><Label className="font-semibold">Full Name *</Label><Input required minLength={2} value={name} onChange={e=>setName(e.target.value)} className="h-12" /></div>
+              <div id="tour-participant-details" className="grid md:grid-cols-2 gap-6 transition-all">
+                <div className="space-y-2"><Label className="font-semibold">Full Name *</Label><Input required minLength={2} value={name} onChange={e=>{setName(e.target.value); if(activeError) setActiveError(null);}} className="h-12" placeholder="Athlete Full Name" /></div>
               </div>
             )}
             
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* Step 3: Contact & Location */}
+            <div id="tour-contact-location" className="grid md:grid-cols-2 gap-6 transition-all">
                <div className="space-y-2">
                   <Label className="font-semibold">Phone Number (Required for Tracking) *</Label>
-                  <Input required pattern="^\+?[0-9]{10,15}$" value={phone} onChange={e=>setPhone(e.target.value)} type="tel" className="h-12" placeholder="e.g. 9876543210" />
+                  <Input required pattern="^\+?[0-9]{10,15}$" value={phone} onChange={e=>{setPhone(e.target.value); if(activeError) setActiveError(null);}} type="tel" className="h-12" placeholder="e.g. 9876543210" />
+                  <p className="text-[11px] text-muted-foreground">Used to find registrations and send match schedule alerts.</p>
                 </div>
                 <div className="space-y-2">
-                  <Label className="font-semibold">Village / City Location *</Label>
+                  <Label className="font-semibold flex items-center justify-between">
+                    <span>Village / City Location *</span>
+                    <span className="text-[11px] text-primary font-normal">Tap 📍 to auto-fill</span>
+                  </Label>
                   <div className="flex gap-2">
-                    <Input required minLength={3} className="h-12 flex-1" value={location} onChange={(e) => setLocation(e.target.value)} />
-                    <Button type="button" variant="outline" className="h-12 px-4" onClick={getCurrentLocation} disabled={locating}><MapPin className="w-5 h-5 text-primary" /></Button>
+                    <Input required minLength={3} className="h-12 flex-1" value={location} onChange={(e) => {setLocation(e.target.value); if(activeError) setActiveError(null);}} placeholder="e.g. Chavatagunta" />
+                    <Button type="button" variant="outline" className="h-12 px-4" onClick={getCurrentLocation} disabled={locating} title="Auto-detect Village Location"><MapPin className="w-5 h-5 text-primary" /></Button>
                   </div>
                 </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* DOB & Gender */}
+            <div id="tour-dob-gender" className="grid md:grid-cols-2 gap-6 transition-all">
               <div className="space-y-2">
                 <div className="flex justify-between"><Label className="font-semibold">Date of Birth *</Label>{age !== null && <span className="text-xs font-bold text-primary">{age} yrs</span>}</div>
                 <Input required type="date" max={maxDobStr} value={dob} onChange={handleDobChange} className="h-12" />
               </div>
               <div className="space-y-2">
                 <Label className="font-semibold">Gender *</Label>
-                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={gender} onChange={e=>setGender(e.target.value)}>
+                <select className="flex h-12 w-full rounded-md border bg-background px-3" required value={gender} onChange={e=>{setGender(e.target.value); if(activeError) setActiveError(null);}}>
                   <option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option>
                 </select>
               </div>
             </div>
 
-            <div className="space-y-4 pt-6 border-t">
-              <h3 className="font-bold text-xl text-primary">Payment Details (Fee: ₹{event.entryFee})</h3>
+            {/* Step 4: UPI Payment Details */}
+            <div id="tour-payment" className="space-y-4 pt-6 border-t transition-all">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-xl text-primary">Payment Details (Fee: ₹{event.entryFee})</h3>
+                <span className="text-xs font-semibold text-muted-foreground">UPI Payment Required</span>
+              </div>
               <div className="grid md:grid-cols-2 gap-4">
                 <div 
                   className="border-2 rounded-xl p-5 opacity-50 bg-muted/20 border-muted/80 cursor-not-allowed relative select-none"
@@ -329,15 +518,42 @@ export function RegistrationForm({ event, upiId = "bkv@ybl" }: { event: any; upi
                     </button>
                   </div>
                   <div>
-                    <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => setProofUrl(res?.info?.secure_url)}>
-                      {({ open }) => <Button type="button" variant={proofUrl ? "default" : "outline"} onClick={() => open()}>{proofUrl ? 'Screenshot Uploaded!' : 'Upload Payment Screenshot'}</Button>}
+                    <CldUploadWidget signatureEndpoint="/api/sign-image" onSuccess={(res: any) => { setProofUrl(res?.info?.secure_url); if(activeError) setActiveError(null); }}>
+                      {({ open }) => (
+                        <Button 
+                          type="button" 
+                          variant={proofUrl ? "default" : "outline"} 
+                          onClick={() => open()}
+                          className={`font-bold ${proofUrl ? "bg-emerald-600 hover:bg-emerald-700" : ""}`}
+                        >
+                          {proofUrl ? (
+                            <><CheckCircle2 className="w-4 h-4 mr-2" /> Screenshot Uploaded!</>
+                          ) : (
+                            <><UploadCloud className="w-4 h-4 mr-2" /> Upload Payment Screenshot</>
+                          )}
+                        </Button>
+                      )}
                     </CldUploadWidget>
                   </div>
+                  <p className="text-xs text-muted-foreground">Attach transaction screenshot for instant match verification.</p>
                 </div>
               )}
             </div>
 
-            <Button type="submit" className="w-full h-14 text-xl font-bold mt-8 shadow-lg">Preview Registration</Button>
+            {/* Smart Click-to-Complete Error Assistant Alert (Option 3) */}
+            {activeError && (
+              <div className="p-4 bg-amber-50 border-2 border-amber-300 rounded-xl text-amber-900 font-bold flex items-center gap-3 shadow-md animate-bounce">
+                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+                <span className="text-sm">{activeError}</span>
+              </div>
+            )}
+
+            {/* Step 5: Submit Preview Button */}
+            <div id="tour-submit-btn" className="pt-2">
+              <Button type="submit" className="w-full h-14 text-xl font-bold shadow-lg hover:shadow-xl transition-all">
+                Preview Registration
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

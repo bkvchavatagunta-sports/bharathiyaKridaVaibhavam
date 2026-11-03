@@ -176,11 +176,19 @@ export default async function EventDetails({ params }: { params: Promise<{ slug:
                    {event.status === "REGISTRATION_CLOSED" ? "Registration Closed" : "Event Ended"}
                  </Button>
               ) : (
-                <Link href={`/events/${event.slug}/register`}>
-                  <Button size="lg" className="w-full font-bold text-lg shadow-lg">
-                    Register Now
-                  </Button>
-                </Link>
+                <div className="space-y-3">
+                  <Link href={`/events/${event.slug}/register`}>
+                    <Button size="lg" className="w-full font-bold text-lg shadow-lg">
+                      Register Now
+                    </Button>
+                  </Link>
+                  <Link 
+                    href={`/events/${event.slug}/register?tour=true`}
+                    className="inline-flex items-center justify-center w-full py-2.5 px-3 rounded-lg border border-amber-300 bg-amber-50/80 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all text-center gap-1.5 shadow-sm"
+                  >
+                    <span>💡 How to Register? (30-Sec Interactive Demo)</span>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
